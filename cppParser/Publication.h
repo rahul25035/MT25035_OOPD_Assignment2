@@ -5,9 +5,12 @@
 #include "String.h"
 #include "Author.h"
 #include "SystemInterface.h"
-#include <new>      // for placement new
-#include <cstddef>  // for size_t
-#include <cstdint>  // for intptr_t
+
+// Manual placement new implementation
+inline void* operator new(size_t size, void* ptr) {
+    (void)size; // suppress unused parameter warning
+    return ptr;
+}
 
 class Publication {
 private:
@@ -16,23 +19,17 @@ private:
     String journal;
     String volume;
     String pages;
-
-    // URL fields as required by assignment
     String pdfUrl;
     String sourceCodeUrl;
     String presentationUrl;
-
-    // Dynamic author array (no fixed lengths as required)
     Author* authors;
     int authorCount;
     int authorCapacity;
 
     void ensureAuthorCapacity() {
         if (authorCount < authorCapacity) return;
-
+        
         int newCapacity = (authorCapacity == 0) ? 4 : authorCapacity * 2;
-
-        // Compute bytes using size_t then cast to long for sbrk argument
         size_t totalBytes = (size_t)newCapacity * sizeof(Author);
         long bytes = (long)totalBytes;
 
@@ -44,19 +41,17 @@ private:
 
         Author* newAuthors = (Author*)raw;
 
-        // Construct Author objects in-place for the whole new block
+        // Construct Author objects in-place
         for (int i = 0; i < newCapacity; i++) {
             new (newAuthors + i) Author();
         }
 
-        // If there are existing authors, copy them into the new block
-        if (authors != nullptr && authorCount > 0) {
+        // Copy existing authors
+        if (authors != (Author*)0 && authorCount > 0) {
             for (int i = 0; i < authorCount; i++) {
-                newAuthors[i] = authors[i]; // uses Author::operator=
+                newAuthors[i] = authors[i];
             }
         }
-
-        // Note: previous 'authors' memory cannot be reclaimed with sbrk in this simple model.
 
         authors = newAuthors;
         authorCapacity = newCapacity;

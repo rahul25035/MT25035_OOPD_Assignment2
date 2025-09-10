@@ -3,8 +3,6 @@
 #define STRING_H
 
 #include "SystemInterface.h"
-#include <cstddef>   // for size_t
-#include <cstdint>   // for intptr_t
 
 class String {
 private:
@@ -33,7 +31,7 @@ private:
         }
 
         char* new_data = (char*) my_malloc(new_capacity);
-        if (!new_data) { // defensive, though my_malloc exits on error
+        if (!new_data) {
             SystemInterface::write(STDERR_FILENO, "Memory allocation failed\n", 25);
             SystemInterface::exit(1);
         }
@@ -54,12 +52,12 @@ private:
 
 public:
     // Constructors
-    String() : data(nullptr), length(0), capacity(0) {
+    String() : data((char*)0), length(0), capacity(0) {
         ensure_capacity(1);
         data[0] = '\0';
     }
 
-    String(const char* str) : data(nullptr), length(0), capacity(0) {
+    String(const char* str) : data((char*)0), length(0), capacity(0) {
         if (!str) {
             ensure_capacity(1);
             data[0] = '\0';
@@ -77,7 +75,7 @@ public:
         }
     }
 
-    String(const String& other) : data(nullptr), length(0), capacity(0) {
+    String(const String& other) : data((char*)0), length(0), capacity(0) {
         length = other.length;
         ensure_capacity(length + 1);
         for (size_t i = 0; i <= length; i++) {
@@ -85,8 +83,7 @@ public:
         }
     }
 
-    // Destructor: with sbrk-based allocation we cannot free individual blocks,
-    // so destructor is empty by necessity.
+    // Destructor
     ~String() {
     }
 
@@ -98,6 +95,25 @@ public:
             for (size_t i = 0; i <= length; i++) {
                 data[i] = other.data[i];
             }
+        }
+        return *this;
+    }
+
+    String& operator=(const char* str) {
+        if (!str) {
+            length = 0;
+            ensure_capacity(1);
+            data[0] = '\0';
+            return *this;
+        }
+
+        size_t i = 0;
+        while (str[i]) i++;
+        length = i;
+
+        ensure_capacity(length + 1);
+        for (size_t j = 0; j <= length; j++) {
+            data[j] = str[j];
         }
         return *this;
     }

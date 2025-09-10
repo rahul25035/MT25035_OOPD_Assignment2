@@ -3,11 +3,16 @@
 #define BIBLIOGRAPHY_H
 
 #include "String.h"
-#include "Publication.h"
+#include "Publication.h"  
 #include "SystemInterface.h"
-#include <new>       // placement new
-#include <cstddef>
-#include <cstdint>
+// Manual placement new implementation
+#ifndef PLACEMENT_NEW_DEFINED
+#define PLACEMENT_NEW_DEFINED
+inline void* operator new(size_t size, void* ptr) {
+    (void)size;
+    return ptr;
+}
+#endif
 
 class Bibliography {
 private:
