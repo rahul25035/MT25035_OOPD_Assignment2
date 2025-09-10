@@ -87,38 +87,24 @@ struct CommandLineArgs {
 // In main.cpp - Fix parseCommandLine
 CommandLineArgs parseCommandLine(int argc, char* argv[]) {
     CommandLineArgs args;
-    
-    // Basic validation
+
+    // Expect exactly two arguments (in addition to argv[0])
     if (argc != 3) {
         args.valid = false;
-        if (argc > 0 && argv && argv) {  // Add null checks
-            args.program_name = String(argv);
+        if (argc > 0 && argv[0]) {
+            args.program_name = String(argv[0]);  // argv[0], not argv
         }
         return args;
     }
-    
-    // Validate all arguments are non-null
-    if (!argv || !argv || !argv || !argv) {
-        args.valid = false;
-        return args;
-    }
-    
-    args.program_name = String(argv);
-    args.bib_file = String(argv);
-    args.institute_name = String(argv);
-    args.valid = true;
-    
+
+    // Now argc == 3, so argv[0], argv[1], argv[2] are valid C-strings
+    args.program_name    = String(argv[0]);
+    args.bib_file        = String(argv[1]);
+    args.institute_name  = String(argv[2]);
+    args.valid           = true;
     return args;
 }
 
-
-    args.program_name = String(argv[0]);
-    args.bib_file = String(argv[1]);
-    args.institute_name = String(argv[2]);
-    args.valid = true;
-
-    return args;
-}
 
 // Main parsing function
 int parseBibFile(const String& filename, const String& instituteName) {
