@@ -1,16 +1,15 @@
-// SystemInterface.h - Direct system calls, NO standard libraries
+// SystemInterface.h - Direct system calls, NO high-level stdio
 #ifndef SYSTEM_INTERFACE_H
 #define SYSTEM_INTERFACE_H
 
-// Basic type definitions (no stddef.h)
-typedef long size_t;
-typedef long ssize_t;
-typedef int bool;
-#define true 1
-#define false 0
-#define NULL ((void*)0)
+// Minimal standard headers for fixed-width and size types.
+// These do NOT pull in iostreams or high-level C++ I/O.
+#include <cstddef>  // for size_t
+#include <cstdint>  // for intptr_t, etc.
 
-// System call numbers for Linux x86_64
+/*
+ * System call numbers for Linux x86_64
+ */
 #define SYS_read    0
 #define SYS_write   1
 #define SYS_open    2
@@ -23,24 +22,28 @@ typedef int bool;
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2
 
-// File access modes
+// File access modes (simple definitions kept from original)
 #define O_RDONLY 0
 #define O_WRONLY 1
 #define O_RDWR   2
 
-// System call interface using inline assembly
+// Basic integer types used by the interface
+typedef long ssize_t;   // keep compatible with your previous code
+
+// System call interface using inline assembly (x86_64)
+// These wrappers return long (raw syscall return). Caller converts as needed.
 class SystemInterface {
 public:
     static long syscall1(long number, long arg1) {
         long result;
         asm volatile(
             "movq %1, %%rax\n\t"
-            "movq %2, %%rdi\n\t" 
+            "movq %2, %%rdi\n\t"
             "syscall\n\t"
             "movq %%rax, %0"
             : "=r"(result)
             : "r"(number), "r"(arg1)
-            : "rax", "rdi", "rcx", "r11", "memory"
+            : "rcx", "r11", "memory"
         );
         return result;
     }
@@ -55,7 +58,7 @@ public:
             "movq %%rax, %0"
             : "=r"(result)
             : "r"(number), "r"(arg1), "r"(arg2)
-            : "rax", "rdi", "rsi", "rcx", "r11", "memory"
+            : "rcx", "r11", "memory"
         );
         return result;
     }
@@ -71,44 +74,66 @@ public:
             "movq %%rax, %0"
             : "=r"(result)
             : "r"(number), "r"(arg1), "r"(arg2), "r"(arg3)
-            : "rax", "rdi", "rsi", "rdx", "rcx", "r11", "memory"
+            : "rcx", "r11", "memory"
         );
         return result;
     }
 
     // Basic I/O operations
+    // Use (long)(intptr_t) for pointer arguments to avoid warnings
     static ssize_t read(int fd, void* buf, size_t count) {
-        return syscall3(SYS_read, fd, (long)buf, count);
+        return (ssize_t)syscall3(SYS_read, (long)fd, (long)(intptr_t)buf, (long)count);
     }
 
     static ssize_t write(int fd, const void* buf, size_t count) {
-        return syscall3(SYS_write, fd, (long)buf, count);
+        return (ssize_t)syscall3(SYS_write, (long)fd, (long)(intptr_t)buf, (long)count);
     }
 
+    // open: use the 3-arg syscall. Passing 0 for mode is safe for read-only.
     static int open(const char* pathname, int flags) {
-        return syscall2(SYS_open, (long)pathname, flags);
+        long ret = syscall3(SYS_open, (long)(intptr_t)pathname, (long)flags, (long)0);
+        return (int)ret;
     }
 
     static int close(int fd) {
-        return syscall1(SYS_close, fd);
+        return (int)syscall1(SYS_close, (long)fd);
     }
 
     static void exit(int status) {
-        syscall1(SYS_exit, status);
+        syscall1(SYS_exit, (long)status);
+        // unreachable; infinite loop to satisfy compiler
+        for (;;) {}
     }
 
-    // Memory management using brk system call
+    // sbrk-like allocator wrapper using brk syscall.
+    // Behavior:
+    //  - syscall1(SYS_brk, 0) returns current program break (or -1 on error).
+    //  - syscall1(SYS_brk, addr) returns the new break address on success, or a value != addr on failure.
     static void* sbrk(long increment) {
-        static char* current_brk = NULL;
-        if (current_brk == NULL) {
-            current_brk = (char*)syscall1(SYS_brk, 0);
+        static char* current_brk = nullptr;
+
+        // Initialize current break
+        if (current_brk == nullptr) {
+            long initial = syscall1(SYS_brk, 0);
+            if (initial == -1) {
+                return (void*)-1;
+            }
+            current_brk = (char*)(intptr_t)initial;
         }
+
         char* old_brk = current_brk;
-        char* new_brk = (char*)syscall1(SYS_brk, (long)(current_brk + increment));
-        if (new_brk == current_brk) return (void*)-1; // Error
-        current_brk = new_brk;
-        return old_brk;
+        char* desired_brk = current_brk + increment;
+
+        long brk_ret = syscall1(SYS_brk, (long)(intptr_t)desired_brk);
+
+        // On success the raw syscall returns the new break (desired_brk).
+        if (brk_ret == (long)(intptr_t)desired_brk) {
+            current_brk = desired_brk;
+            return (void*)old_brk;
+        } else {
+            return (void*)-1;
+        }
     }
 };
 
-#endif
+#endif // SYSTEM_INTERFACE_H

@@ -1,8 +1,10 @@
-// String.h - Custom string implementation, NO standard libraries
+// String.h - Custom string implementation using SystemInterface (no std::string)
 #ifndef STRING_H
 #define STRING_H
 
 #include "SystemInterface.h"
+#include <cstddef>   // for size_t
+#include <cstdint>   // for intptr_t
 
 class String {
 private:
@@ -10,9 +12,16 @@ private:
     size_t length;
     size_t capacity;
 
-    // Memory allocator using system calls
+    // Allocate memory from sbrk and handle errors.
     static void* my_malloc(size_t size) {
-        return SystemInterface::sbrk(size);
+        // Avoid returning nullptr for size==0 callers may not expect nullptr.
+        if (size == 0) size = 1;
+        void* p = SystemInterface::sbrk((long)(intptr_t)size);
+        if (p == (void*)-1) {
+            SystemInterface::write(STDERR_FILENO, "Memory allocation failed\n", 25);
+            SystemInterface::exit(1);
+        }
+        return p;
     }
 
     void ensure_capacity(size_t needed) {
@@ -23,16 +32,20 @@ private:
             new_capacity *= 2;
         }
 
-        char* new_data = (char*)my_malloc(new_capacity);
-        if (!new_data) {
+        char* new_data = (char*) my_malloc(new_capacity);
+        if (!new_data) { // defensive, though my_malloc exits on error
             SystemInterface::write(STDERR_FILENO, "Memory allocation failed\n", 25);
             SystemInterface::exit(1);
         }
 
         if (data) {
+            // copy existing content including the null terminator
             for (size_t i = 0; i <= length; i++) {
                 new_data[i] = data[i];
             }
+        } else {
+            // initialize the buffer with null terminator
+            new_data[0] = '\0';
         }
 
         data = new_data;
@@ -53,13 +66,14 @@ public:
             return;
         }
 
-        // Calculate length manually (no strlen)
-        length = 0;
-        while (str[length]) length++;
+        // compute length manually
+        size_t i = 0;
+        while (str[i]) i++;
+        length = i;
 
         ensure_capacity(length + 1);
-        for (size_t i = 0; i <= length; i++) {
-            data[i] = str[i];
+        for (size_t j = 0; j <= length; j++) {
+            data[j] = str[j];
         }
     }
 
@@ -71,12 +85,12 @@ public:
         }
     }
 
-    // Destructor (simplified - can't free with sbrk)
+    // Destructor: with sbrk-based allocation we cannot free individual blocks,
+    // so destructor is empty by necessity.
     ~String() {
-        // With sbrk, we can't free individual allocations
     }
 
-    // Assignment operator
+    // Assignment operators
     String& operator=(const String& other) {
         if (this != &other) {
             length = other.length;
@@ -96,37 +110,35 @@ public:
             return *this;
         }
 
-        length = 0;
-        while (str[length]) length++;
+        size_t i = 0;
+        while (str[i]) i++;
+        length = i;
 
         ensure_capacity(length + 1);
-        for (size_t i = 0; i <= length; i++) {
-            data[i] = str[i];
+        for (size_t j = 0; j <= length; j++) {
+            data[j] = str[j];
         }
         return *this;
     }
 
-    // Comparison operators for sorting
+    // Comparison operators
     bool operator<(const String& other) const {
         if (!data && !other.data) return false;
         if (!data) return true;
         if (!other.data) return false;
 
-        // Manual strcmp implementation
         size_t i = 0;
-        while (data[i] && other.data[i]) {
+        while (i < length && i < other.length) {
             if (data[i] < other.data[i]) return true;
             if (data[i] > other.data[i]) return false;
             i++;
         }
-        return data[i] == 0 && other.data[i] != 0;
+        if (i == length && i == other.length) return false;
+        return (i == length) && (other.length != length);
     }
 
     bool operator==(const String& other) const {
-        if (!data && !other.data) return true;
-        if (!data || !other.data) return false;
         if (length != other.length) return false;
-
         for (size_t i = 0; i < length; i++) {
             if (data[i] != other.data[i]) return false;
         }
@@ -137,7 +149,7 @@ public:
         return !(*this == other);
     }
 
-    // String concatenation
+    // Concatenation
     String operator+(const String& other) const {
         String result(*this);
         result += other;
@@ -145,7 +157,7 @@ public:
     }
 
     String& operator+=(const String& other) {
-        if (!other.data) return *this;
+        if (other.length == 0) return *this;
 
         size_t new_length = length + other.length;
         ensure_capacity(new_length + 1);
@@ -157,10 +169,10 @@ public:
         return *this;
     }
 
-    // Access operators
+    // Access operators (with bounds checking)
     char& operator[](size_t index) {
         if (index >= length) {
-            SystemInterface::write(STDERR_FILENO, "String index out of bounds\n", 28);
+            SystemInterface::write(STDERR_FILENO, "String index out of bounds\n", 27);
             SystemInterface::exit(1);
         }
         return data[index];
@@ -168,26 +180,27 @@ public:
 
     const char& operator[](size_t index) const {
         if (index >= length) {
-            SystemInterface::write(STDERR_FILENO, "String index out of bounds\n", 28);
+            SystemInterface::write(STDERR_FILENO, "String index out of bounds\n", 27);
             SystemInterface::exit(1);
         }
         return data[index];
     }
 
-    // Utility functions
+    // Utilities
     size_t size() const { return length; }
     bool empty() const { return length == 0; }
     const char* c_str() const { return data ? data : ""; }
 
-    // String operations (following original C logic)
+    // Trim leading/trailing whitespace
     String trim() const {
         if (!data || length == 0) return String();
 
-        size_t start = 0, end = length - 1;
+        size_t start = 0;
+        size_t end = (length == 0) ? 0 : (length - 1);
 
-        // Trim leading whitespace (manual isspace)
-        while (start < length && (data[start] == ' ' || data[start] == '\t' || 
-               data[start] == '\n' || data[start] == '\r' || data[start] == '\f' || 
+        // Trim leading whitespace
+        while (start < length && (data[start] == ' ' || data[start] == '\t' ||
+               data[start] == '\n' || data[start] == '\r' || data[start] == '\f' ||
                data[start] == '\v')) {
             start++;
         }
@@ -195,20 +208,19 @@ public:
         if (start >= length) return String();
 
         // Trim trailing whitespace
-        while (end > start && (data[end] == ' ' || data[end] == '\t' || 
-               data[end] == '\n' || data[end] == '\r' || data[end] == '\f' || 
+        while (end > start && (data[end] == ' ' || data[end] == '\t' ||
+               data[end] == '\n' || data[end] == '\r' || data[end] == '\f' ||
                data[end] == '\v')) {
             end--;
         }
 
-        // Create trimmed string
         size_t trimmed_length = end - start + 1;
-        char* temp = (char*)my_malloc(trimmed_length + 1);
+        // Allocate temporary buffer and construct String from it
+        char* temp = (char*) my_malloc(trimmed_length + 1);
         if (!temp) {
             SystemInterface::write(STDERR_FILENO, "Memory allocation failed\n", 25);
             SystemInterface::exit(1);
         }
-
         for (size_t i = 0; i < trimmed_length; i++) {
             temp[i] = data[start + i];
         }
@@ -223,27 +235,29 @@ public:
         if (result.data) {
             for (size_t i = 0; i < result.length; i++) {
                 if (result.data[i] >= 'A' && result.data[i] <= 'Z') {
-                    result.data[i] += 32; // Manual tolower
+                    result.data[i] = (char)(result.data[i] + ('a' - 'A'));
                 }
             }
         }
         return result;
     }
 
+    // Find substring. Returns index or -1 if not found.
     int find(const String& substr) const {
         return find(substr.c_str());
     }
 
     int find(const char* substr) const {
-        if (!data || !substr || length == 0) return -1;
+        if (!data) return -1;
+        if (!substr) return -1;
 
+        // compute substr length
         size_t substr_len = 0;
         while (substr[substr_len]) substr_len++;
 
         if (substr_len == 0) return 0;
         if (substr_len > length) return -1;
 
-        // Manual strstr implementation
         for (size_t i = 0; i <= length - substr_len; i++) {
             bool match = true;
             for (size_t j = 0; j < substr_len; j++) {
@@ -252,23 +266,22 @@ public:
                     break;
                 }
             }
-            if (match) return i;
+            if (match) return (int)i;
         }
         return -1;
     }
 
+    // Substring (start, len). If len==0 -> till end.
     String substr(size_t start, size_t len = 0) const {
         if (!data || start >= length) return String();
 
-        if (len == 0) len = length - start;
-        if (start + len > length) len = length - start;
+        if (len == 0 || start + len > length) len = length - start;
 
-        char* temp = (char*)my_malloc(len + 1);
+        char* temp = (char*) my_malloc(len + 1);
         if (!temp) {
             SystemInterface::write(STDERR_FILENO, "Memory allocation failed\n", 25);
             SystemInterface::exit(1);
         }
-
         for (size_t i = 0; i < len; i++) {
             temp[i] = data[start + i];
         }
@@ -278,7 +291,7 @@ public:
         return result;
     }
 
-    // I/O functions (no printf/scanf)
+    // I/O helpers
     void print() const {
         if (data && length > 0) {
             SystemInterface::write(STDOUT_FILENO, data, length);
@@ -291,4 +304,4 @@ public:
     }
 };
 
-#endif
+#endif // STRING_H

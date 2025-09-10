@@ -1,8 +1,9 @@
-// Author.h - Author class following original C logic
+// Author.h - Author class following original C logic (corrected)
 #ifndef AUTHOR_H
 #define AUTHOR_H
 
 #include "String.h"
+#include "SystemInterface.h"
 
 class Author {
 private:
@@ -11,30 +12,19 @@ private:
 
 public:
     // Constructors
-    Author() {
-        // Default constructor - empty strings
-    }
+    Author() : name(), affiliation() {}
 
-    Author(const String& author_name, const String& author_affiliation = String()) {
-        name = author_name;
-        affiliation = author_affiliation;
-    }
+    Author(const String& author_name, const String& author_affiliation = String())
+        : name(author_name), affiliation(author_affiliation) {}
 
-    Author(const char* author_name, const char* author_affiliation = "") {
-        name = String(author_name);
-        affiliation = String(author_affiliation);
-    }
+    Author(const char* author_name, const char* author_affiliation = "")
+        : name(author_name ? author_name : ""), affiliation(author_affiliation ? author_affiliation : "") {}
 
     // Copy constructor
-    Author(const Author& other) {
-        name = other.name;
-        affiliation = other.affiliation;
-    }
+    Author(const Author& other) : name(other.name), affiliation(other.affiliation) {}
 
     // Destructor
-    ~Author() {
-        // String destructors handle cleanup
-    }
+    ~Author() {}
 
     // Assignment operator
     Author& operator=(const Author& other) {
@@ -45,24 +35,24 @@ public:
         return *this;
     }
 
-    // Getters
-    String getName() const { return name; }
-    String getAffiliation() const { return affiliation; }
+    // Getters (return const references to avoid unnecessary copies)
+    const String& getName() const { return name; }
+    const String& getAffiliation() const { return affiliation; }
 
     // Setters
     void setName(const String& author_name) { name = author_name; }
     void setAffiliation(const String& author_affiliation) { affiliation = author_affiliation; }
 
-    // Institute checking (following original C logic exactly)
+    // Institute checking (following original C logic with improvements)
     bool isFromInstitute(const String& institute_name) const {
         if (institute_name.empty()) return false;
 
-        // Convert to lowercase for comparison (following original C logic)
+        // Compare lowercase forms
         String name_lower = name.to_lowercase();
         String institute_lower = institute_name.to_lowercase();
 
-        // Check if institute name appears in author name (original C logic)
-        return name_lower.find(institute_lower) != -1;
+        int pos = name_lower.find(institute_lower);
+        return pos >= 0;
     }
 
     // I/O functions
@@ -95,4 +85,4 @@ public:
     }
 };
 
-#endif
+#endif // AUTHOR_H

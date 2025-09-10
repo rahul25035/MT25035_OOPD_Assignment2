@@ -4,6 +4,10 @@
 
 #include "String.h"
 #include "Author.h"
+#include "SystemInterface.h"
+#include <new>      // for placement new
+#include <cstddef>  // for size_t
+#include <cstdint>  // for intptr_t
 
 class Publication {
 private:
@@ -24,67 +28,67 @@ private:
     int authorCapacity;
 
     void ensureAuthorCapacity() {
-        if (authorCount >= authorCapacity) {
-            int newCapacity = (authorCapacity == 0) ? 4 : authorCapacity * 2;
+        if (authorCount < authorCapacity) return;
 
-            // Allocate new array
-            Author* newAuthors = (Author*)SystemInterface::sbrk(newCapacity * sizeof(Author));
-            if (!newAuthors) {
-                SystemInterface::write(STDERR_FILENO, "Memory allocation failed\n", 25);
-                SystemInterface::exit(1);
-            }
+        int newCapacity = (authorCapacity == 0) ? 4 : authorCapacity * 2;
 
-            // Use placement new to construct objects
-            for (int i = 0; i < newCapacity; i++) {
-                new (newAuthors + i) Author();
-            }
+        // Compute bytes using size_t then cast to long for sbrk argument
+        size_t totalBytes = (size_t)newCapacity * sizeof(Author);
+        long bytes = (long)totalBytes;
 
-            // Copy existing authors
-            for (int i = 0; i < authorCount; i++) {
-                newAuthors[i] = authors[i];
-            }
-
-            authors = newAuthors;
-            authorCapacity = newCapacity;
+        void* raw = SystemInterface::sbrk(bytes);
+        if (raw == (void*)-1) {
+            SystemInterface::write(STDERR_FILENO, "Memory allocation failed\n", 25);
+            SystemInterface::exit(1);
         }
+
+        Author* newAuthors = (Author*)raw;
+
+        // Construct Author objects in-place for the whole new block
+        for (int i = 0; i < newCapacity; i++) {
+            new (newAuthors + i) Author();
+        }
+
+        // If there are existing authors, copy them into the new block
+        if (authors != nullptr && authorCount > 0) {
+            for (int i = 0; i < authorCount; i++) {
+                newAuthors[i] = authors[i]; // uses Author::operator=
+            }
+        }
+
+        // Note: previous 'authors' memory cannot be reclaimed with sbrk in this simple model.
+
+        authors = newAuthors;
+        authorCapacity = newCapacity;
     }
 
 public:
     // Constructors
-    Publication() : authors(nullptr), authorCount(0), authorCapacity(0) {}
+    Publication()
+        : title(), year(), journal(), volume(), pages(),
+          pdfUrl(), sourceCodeUrl(), presentationUrl(),
+          authors(nullptr), authorCount(0), authorCapacity(0) {}
 
-    Publication(const String& pub_title, const String& pub_year = String()) {
-        title = pub_title;
-        year = pub_year;
-        authors = nullptr;
-        authorCount = 0;
-        authorCapacity = 0;
-    }
+    Publication(const String& pub_title, const String& pub_year = String())
+        : title(pub_title), year(pub_year), journal(), volume(), pages(),
+          pdfUrl(), sourceCodeUrl(), presentationUrl(),
+          authors(nullptr), authorCount(0), authorCapacity(0) {}
 
     // Copy constructor
-    Publication(const Publication& other) {
-        title = other.title;
-        year = other.year;
-        journal = other.journal;
-        volume = other.volume;
-        pages = other.pages;
-        pdfUrl = other.pdfUrl;
-        sourceCodeUrl = other.sourceCodeUrl;
-        presentationUrl = other.presentationUrl;
-
-        authors = nullptr;
-        authorCount = 0;
-        authorCapacity = 0;
-
-        // Copy authors
+    Publication(const Publication& other)
+        : title(other.title), year(other.year), journal(other.journal),
+          volume(other.volume), pages(other.pages),
+          pdfUrl(other.pdfUrl), sourceCodeUrl(other.sourceCodeUrl),
+          presentationUrl(other.presentationUrl),
+          authors(nullptr), authorCount(0), authorCapacity(0) {
+        // Copy authors one by one using addAuthor to ensure capacity
         for (int i = 0; i < other.authorCount; i++) {
             addAuthor(other.authors[i]);
         }
     }
 
-    // Destructor
+    // Destructor (can't free sbrk allocations in this model)
     ~Publication() {
-        // Simplified cleanup
     }
 
     // Assignment operator
@@ -99,8 +103,9 @@ public:
             sourceCodeUrl = other.sourceCodeUrl;
             presentationUrl = other.presentationUrl;
 
-            // Clear and copy authors
+            // Reset authors and copy
             authorCount = 0;
+            // Note: we intentionally do not free old memory (sbrk model)
             for (int i = 0; i < other.authorCount; i++) {
                 addAuthor(other.authors[i]);
             }
@@ -139,7 +144,7 @@ public:
 
     Author getAuthor(int index) const {
         if (index < 0 || index >= authorCount) {
-            SystemInterface::write(STDERR_FILENO, "Author index out of bounds\n", 28);
+            SystemInterface::write(STDERR_FILENO, "Author index out of bounds\n", 27);
             SystemInterface::exit(1);
         }
         return authors[index];
@@ -158,10 +163,10 @@ public:
 
     // Comparison operator for sorting (year desc, title asc as required)
     bool operator<(const Publication& other) const {
-        // Compare years - convert to numbers manually
-        int thisYear = 0, otherYear = 0;
+        // Parse years to integers (non-digits treated as 0)
+        int thisYear = 0;
+        int otherYear = 0;
 
-        // Manual atoi for year
         const char* thisYearStr = year.c_str();
         const char* otherYearStr = other.year.c_str();
 
@@ -172,9 +177,9 @@ public:
             otherYear = otherYear * 10 + (otherYearStr[i] - '0');
         }
 
-        // Year descending (newer first)
+        // For descending order by year (newer first)
         if (thisYear != otherYear) {
-            return otherYear < thisYear; // Reverse for descending
+            return thisYear > otherYear;
         }
 
         // Title ascending (lexicographic)
@@ -242,4 +247,4 @@ public:
     }
 };
 
-#endif
+#endif // PUBLICATION_H

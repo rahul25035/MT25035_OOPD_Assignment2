@@ -1,9 +1,13 @@
-// Bibliography.h - Bibliography management with + operator
+// Bibliography.h - Bibliography management with + operator (fixed)
 #ifndef BIBLIOGRAPHY_H
 #define BIBLIOGRAPHY_H
 
 #include "String.h"
 #include "Publication.h"
+#include "SystemInterface.h"
+#include <new>       // placement new
+#include <cstddef>
+#include <cstdint>
 
 class Bibliography {
 private:
@@ -12,28 +16,34 @@ private:
     int publicationCapacity;
 
     void ensureCapacity() {
-        if (publicationCount >= publicationCapacity) {
-            int newCapacity = (publicationCapacity == 0) ? 4 : publicationCapacity * 2;
+        if (publicationCount < publicationCapacity) return;
 
-            Publication* newPubs = (Publication*)SystemInterface::sbrk(newCapacity * sizeof(Publication));
-            if (!newPubs) {
-                SystemInterface::write(STDERR_FILENO, "Memory allocation failed\n", 25);
-                SystemInterface::exit(1);
-            }
+        int newCapacity = (publicationCapacity == 0) ? 4 : publicationCapacity * 2;
+        long bytes = (long)(newCapacity * sizeof(Publication));
 
-            // Use placement new
-            for (int i = 0; i < newCapacity; i++) {
-                new (newPubs + i) Publication();
-            }
-
-            // Copy existing publications
-            for (int i = 0; i < publicationCount; i++) {
-                newPubs[i] = publications[i];
-            }
-
-            publications = newPubs;
-            publicationCapacity = newCapacity;
+        void* raw = SystemInterface::sbrk(bytes);
+        if (raw == (void*)-1) {
+            SystemInterface::write(STDERR_FILENO, "Memory allocation failed\n", 25);
+            SystemInterface::exit(1);
         }
+
+        Publication* newPubs = (Publication*)raw;
+
+        // Construct Publication objects in-place for the whole new block
+        for (int i = 0; i < newCapacity; i++) {
+            new (newPubs + i) Publication();
+        }
+
+        // If there's an existing array, copy existing publications into the new block
+        if (publications != nullptr && publicationCount > 0) {
+            for (int i = 0; i < publicationCount; i++) {
+                newPubs[i] = publications[i]; // uses Publication::operator=
+            }
+        }
+
+        // Note: previous 'publications' memory cannot be reclaimed in this simple sbrk model.
+        publications = newPubs;
+        publicationCapacity = newCapacity;
     }
 
     // Sorting implementation
@@ -65,67 +75,75 @@ private:
         publications[j] = temp;
     }
 
-    // BibTeX parsing helper functions (following original C logic)
+    // BibTeX parsing helper functions
+    // Extract field value after 'fieldName' in the line. Returns empty String if not found.
     String extractFieldValue(const String& line, const String& fieldName) {
-        int fieldPos = line.find(fieldName);
-        if (fieldPos == -1) return String();
+        if (line.empty() || fieldName.empty()) return String();
 
-        // Find equals sign
-        const char* lineStr = line.c_str();
-        int equalPos = -1;
-        for (size_t i = fieldPos; i < line.size(); i++) {
-            if (lineStr[i] == '=') {
-                equalPos = i;
+        // Find the field name followed by optional whitespace and '='
+        int pos = line.find(fieldName);
+        if (pos == -1) return String();
+
+        const char* s = line.c_str();
+        int n = (int)line.size();
+
+        // Move to the '=' after the field name
+        int eq = -1;
+        for (int i = pos + (int)fieldName.size(); i < n; i++) {
+            if (s[i] == '=') {
+                eq = i;
                 break;
             }
+            // skip whitespace between field name and '='
+            if (s[i] != ' ' && s[i] != '\t') break;
+        }
+        if (eq == -1) return String();
+
+        // Move to start of value (skip whitespace and opening { or " )
+        int start = eq + 1;
+        while (start < n && (s[start] == ' ' || s[start] == '\t')) start++;
+        bool brace = false;
+        if (start < n && (s[start] == '{' || s[start] == '\"')) {
+            brace = true;
+            start++;
         }
 
-        if (equalPos == -1) return String();
-
-        // Find value start (skip whitespace and braces)
-        int valueStart = equalPos + 1;
-        while (valueStart < (int)line.size() && 
-               (lineStr[valueStart] == ' ' || lineStr[valueStart] == '\t' || 
-                lineStr[valueStart] == '{' || lineStr[valueStart] == '"')) {
-            valueStart++;
+        // Find end of value: matching brace or comma/closing brace or closing quote
+        int end = start;
+        if (brace) {
+            // look for closing brace - be simple: find next '}' in this line
+            while (end < n && s[end] != '}') end++;
+        } else {
+            while (end < n && s[end] != ',' && s[end] != '}' && s[end] != '\n' && s[end] != '\r') end++;
         }
 
-        // Find value end
-        int valueEnd = valueStart;
-        while (valueEnd < (int)line.size() && 
-               lineStr[valueEnd] != ',' && lineStr[valueEnd] != '}' && 
-               lineStr[valueEnd] != '"' && lineStr[valueEnd] != '\n') {
-            valueEnd++;
-        }
+        if (end <= start) return String();
 
-        if (valueEnd > valueStart) {
-            return line.substr(valueStart, valueEnd - valueStart).trim();
-        }
-
-        return String();
+        // Create substring and trim
+        String value = line.substr((size_t)start, (size_t)(end - start)).trim();
+        return value;
     }
 
-    // Extract authors following original C logic exactly
+    // Extract authors splitting on " and " (original C logic)
     void extractAuthors(const String& authorField, Publication& pub) {
         String remaining = authorField;
 
-        // Remove outer braces if present (original C logic)
-        const char* remainingStr = remaining.c_str();
-        if (remainingStr[0] == '{') {
+        // Remove outer braces if present
+        const char* rs = remaining.c_str();
+        if (rs[0] == '{') {
             remaining = remaining.substr(1);
-            if (remaining.size() > 0 && remaining[remaining.size()-1] == '}') {
-                remaining = remaining.substr(0, remaining.size()-1);
+            if (remaining.size() > 0 && remaining[remaining.size() - 1] == '}') {
+                remaining = remaining.substr(0, remaining.size() - 1);
             }
         }
 
-        // Split by " and " (original C logic)
+        // Split by " and "
         while (!remaining.empty()) {
             int andPos = remaining.find(" and ");
             String authorName;
-
             if (andPos != -1) {
-                authorName = remaining.substr(0, andPos).trim();
-                remaining = remaining.substr(andPos + 5).trim();
+                authorName = remaining.substr(0, (size_t)andPos).trim();
+                remaining = remaining.substr((size_t)andPos + 5).trim();
             } else {
                 authorName = remaining.trim();
                 remaining = String();
@@ -154,7 +172,8 @@ public:
 
     // Destructor
     ~Bibliography() {
-        // Simplified cleanup
+        // Cannot free sbrk'd memory here; if you want to run destructors:
+        // for (int i = 0; i < publicationCount; ++i) publications[i].~Publication();
     }
 
     // Assignment operator
@@ -168,7 +187,7 @@ public:
         return *this;
     }
 
-    // + operator for combining bibliographies (as required)
+    // + operator for combining bibliographies
     Bibliography operator+(const Bibliography& other) const {
         Bibliography result(*this);
         result += other;
@@ -186,7 +205,7 @@ public:
     // Publication management
     void addPublication(const Publication& pub) {
         ensureCapacity();
-        publications[publicationCount] = pub;
+        publications[publicationCount] = pub; // uses Publication::operator=
         publicationCount++;
     }
 
@@ -194,7 +213,7 @@ public:
 
     Publication getPublication(int index) const {
         if (index < 0 || index >= publicationCount) {
-            SystemInterface::write(STDERR_FILENO, "Publication index out of bounds\n", 33);
+            SystemInterface::write(STDERR_FILENO, "Publication index out of bounds\n", 32);
             SystemInterface::exit(1);
         }
         return publications[index];
@@ -207,11 +226,11 @@ public:
         }
     }
 
-    // File I/O following original C parsing logic exactly
+    // File I/O - parse BibTeX with fields similar to provided example
     bool loadFromBibFile(const String& filename) {
         int fd = SystemInterface::open(filename.c_str(), O_RDONLY);
         if (fd < 0) {
-            SystemInterface::write(STDERR_FILENO, "Error: Cannot open file ", 25);
+            SystemInterface::write(STDERR_FILENO, "Error: Cannot open file ", 24);
             filename.print();
             SystemInterface::write(STDERR_FILENO, "\n", 1);
             return false;
@@ -221,26 +240,25 @@ public:
         filename.println();
 
         char buffer[1024];
+        int bufPos = 0;
         String currentLine;
         Publication currentPub;
         bool inEntry = false;
         int totalEntries = 0;
 
-        // Read file character by character to build lines
         ssize_t bytesRead;
-        int bufferPos = 0;
-
-        while ((bytesRead = SystemInterface::read(fd, buffer + bufferPos, 1)) > 0) {
-            if (buffer[bufferPos] == '\n') {
-                buffer[bufferPos] = '\0';
+        char ch;
+        while ((bytesRead = SystemInterface::read(fd, &ch, 1)) > 0) {
+            if (ch == '\r') continue; // ignore CR
+            if (ch == '\n' || bufPos >= 1023) {
+                buffer[bufPos] = '\0';
                 currentLine = String(buffer);
                 String trimmedLine = currentLine.trim();
 
-                // Parse line following original C logic exactly
                 if (!trimmedLine.empty()) {
                     const char* lineStr = trimmedLine.c_str();
 
-                    // Check if starting new entry
+                    // Start of entry (e.g., @inproceedings{... ,)
                     if (lineStr[0] == '@') {
                         if (inEntry && currentPub.isValid()) {
                             addPublication(currentPub);
@@ -249,7 +267,7 @@ public:
                         inEntry = true;
                         totalEntries++;
                     }
-                    // Check for end of entry
+                    // End of entry (a line with single '}' usually ends the entry)
                     else if (inEntry && lineStr[0] == '}' && trimmedLine.size() == 1) {
                         if (currentPub.isValid()) {
                             addPublication(currentPub);
@@ -257,33 +275,39 @@ public:
                         currentPub = Publication();
                         inEntry = false;
                     }
-                    // Parse fields
+                    // Parse fields within an entry
                     else if (inEntry) {
-                        // Title field
+                        // Title
                         String titleValue = extractFieldValue(trimmedLine, String("title"));
                         if (!titleValue.empty()) {
                             currentPub.setTitle(titleValue);
                         }
 
-                        // Year field
+                        // Year
                         String yearValue = extractFieldValue(trimmedLine, String("year"));
                         if (!yearValue.empty()) {
                             currentPub.setYear(yearValue);
                         }
 
-                        // Journal field
+                        // Journal
                         String journalValue = extractFieldValue(trimmedLine, String("journal"));
                         if (!journalValue.empty()) {
                             currentPub.setJournal(journalValue);
                         }
 
-                        // Author field (following original C logic)
+                        // Booktitle -> map to journal if journal empty
+                        String booktitleValue = extractFieldValue(trimmedLine, String("booktitle"));
+                        if (!booktitleValue.empty() && currentPub.getJournal().empty()) {
+                            currentPub.setJournal(booktitleValue);
+                        }
+
+                        // Author(s)
                         String authorValue = extractFieldValue(trimmedLine, String("author"));
                         if (!authorValue.empty()) {
                             extractAuthors(authorValue, currentPub);
                         }
 
-                        // URL fields as requested
+                        // PDF or URL
                         String pdfValue = extractFieldValue(trimmedLine, String("pdf"));
                         if (pdfValue.empty()) {
                             pdfValue = extractFieldValue(trimmedLine, String("url"));
@@ -292,29 +316,32 @@ public:
                             currentPub.setPdfUrl(pdfValue);
                         }
 
+                        // Code link
                         String codeValue = extractFieldValue(trimmedLine, String("code"));
                         if (!codeValue.empty()) {
                             currentPub.setSourceCodeUrl(codeValue);
                         }
 
+                        // Slides/presentation - accept both "slides" and "ppt"
                         String slidesValue = extractFieldValue(trimmedLine, String("slides"));
+                        if (slidesValue.empty()) {
+                            slidesValue = extractFieldValue(trimmedLine, String("ppt"));
+                        }
                         if (!slidesValue.empty()) {
                             currentPub.setPresentationUrl(slidesValue);
                         }
+
+                        // Note: abstract and other fields are currently ignored (you can extend to store them in Publication)
                     }
                 }
 
-                bufferPos = 0;
+                bufPos = 0;
             } else {
-                bufferPos++;
-                if (bufferPos >= 1023) {
-                    buffer[1023] = '\0';
-                    bufferPos = 0;
-                }
+                buffer[bufPos++] = ch;
             }
         }
 
-        // Handle last entry
+        // If EOF reached while still in an entry, commit the last publication
         if (inEntry && currentPub.isValid()) {
             addPublication(currentPub);
         }
@@ -322,7 +349,7 @@ public:
         SystemInterface::close(fd);
         sort(); // Sort after loading
 
-        // Print summary following original C format
+        // Print summary
         SystemInterface::write(STDOUT_FILENO, "Loaded ", 7);
         printNumber(publicationCount);
         SystemInterface::write(STDOUT_FILENO, " publications\n", 14);
@@ -330,7 +357,7 @@ public:
         return true;
     }
 
-    // Institute counting following original C logic
+    // Institute counting: counts and prints authors from a given institute
     int countAuthorsFromInstitute(const String& instituteName) const {
         int totalCount = 0;
 
@@ -341,7 +368,7 @@ public:
         for (int i = 0; i < publicationCount; i++) {
             int count = publications[i].countAuthorsFromInstitute(instituteName);
             if (count > 0) {
-                // Print found authors (following original C format)
+                // Print found authors
                 for (int j = 0; j < publications[i].getAuthorCount(); j++) {
                     Author author = publications[i].getAuthor(j);
                     if (author.isFromInstitute(instituteName)) {
@@ -364,7 +391,7 @@ public:
         return totalCount;
     }
 
-    // Helper function to print numbers (no printf)
+    // Helper to print numbers (no printf)
     void printNumber(int n) const {
         if (n == 0) {
             SystemInterface::write(STDOUT_FILENO, "0", 1);
@@ -407,7 +434,7 @@ public:
     void printDetailed() const {
         SystemInterface::write(STDOUT_FILENO, "=== Bibliography (", 18);
         printNumber(publicationCount);
-        SystemInterface::write(STDOUT_FILENO, " publications) ===\n\n", 21);
+        SystemInterface::write(STDOUT_FILENO, " publications) ===\n\n", 20);
 
         for (int i = 0; i < publicationCount; i++) {
             printNumber(i + 1);
@@ -417,7 +444,7 @@ public:
     }
 
     void printSummary(const String& instituteName) const {
-        SystemInterface::write(STDOUT_FILENO, "\n=== Summary ===\n", 18);
+        SystemInterface::write(STDOUT_FILENO, "\n=== Summary ===\n", 17);
         SystemInterface::write(STDOUT_FILENO, "Total BibTeX entries processed: ", 32);
         printNumber(publicationCount);
         SystemInterface::write(STDOUT_FILENO, "\n", 1);
@@ -433,4 +460,4 @@ public:
     bool isEmpty() const { return publicationCount == 0; }
 };
 
-#endif
+#endif // BIBLIOGRAPHY_H
