@@ -118,25 +118,6 @@ public:
         return *this;
     }
 
-    String& operator=(const char* str) {
-        if (!str) {
-            length = 0;
-            ensure_capacity(1);
-            data[0] = '\0';
-            return *this;
-        }
-
-        size_t i = 0;
-        while (str[i]) i++;
-        length = i;
-
-        ensure_capacity(length + 1);
-        for (size_t j = 0; j <= length; j++) {
-            data[j] = str[j];
-        }
-        return *this;
-    }
-
     // Comparison operators
     bool operator<(const String& other) const {
         if (!data && !other.data) return false;
@@ -216,8 +197,8 @@ public:
 
         // Trim leading whitespace
         while (start < length && (data[start] == ' ' || data[start] == '\t' ||
-               data[start] == '\n' || data[start] == '\r' || data[start] == '\f' ||
-               data[start] == '\v')) {
+                data[start] == '\n' || data[start] == '\r' || data[start] == '\f' ||
+                data[start] == '\v')) {
             start++;
         }
 
@@ -225,8 +206,8 @@ public:
 
         // Trim trailing whitespace
         while (end > start && (data[end] == ' ' || data[end] == '\t' ||
-               data[end] == '\n' || data[end] == '\r' || data[end] == '\f' ||
-               data[end] == '\v')) {
+                data[end] == '\n' || data[end] == '\r' || data[end] == '\f' ||
+                data[end] == '\v')) {
             end--;
         }
 

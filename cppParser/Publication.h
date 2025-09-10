@@ -6,11 +6,14 @@
 #include "Author.h"
 #include "SystemInterface.h"
 
-// Manual placement new implementation
+// Global placement new implementation (defined only once)
+#ifndef GLOBAL_PLACEMENT_NEW
+#define GLOBAL_PLACEMENT_NEW
 inline void* operator new(size_t size, void* ptr) {
     (void)size; // suppress unused parameter warning
     return ptr;
 }
+#endif
 
 class Publication {
 private:
@@ -62,12 +65,12 @@ public:
     Publication()
         : title(), year(), journal(), volume(), pages(),
           pdfUrl(), sourceCodeUrl(), presentationUrl(),
-          authors(nullptr), authorCount(0), authorCapacity(0) {}
+          authors((Author*)0), authorCount(0), authorCapacity(0) {}
 
     Publication(const String& pub_title, const String& pub_year = String())
         : title(pub_title), year(pub_year), journal(), volume(), pages(),
           pdfUrl(), sourceCodeUrl(), presentationUrl(),
-          authors(nullptr), authorCount(0), authorCapacity(0) {}
+          authors((Author*)0), authorCount(0), authorCapacity(0) {}
 
     // Copy constructor
     Publication(const Publication& other)
@@ -75,7 +78,7 @@ public:
           volume(other.volume), pages(other.pages),
           pdfUrl(other.pdfUrl), sourceCodeUrl(other.sourceCodeUrl),
           presentationUrl(other.presentationUrl),
-          authors(nullptr), authorCount(0), authorCapacity(0) {
+          authors((Author*)0), authorCount(0), authorCapacity(0) {
         // Copy authors one by one using addAuthor to ensure capacity
         for (int i = 0; i < other.authorCount; i++) {
             addAuthor(other.authors[i]);

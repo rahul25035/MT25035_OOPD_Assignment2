@@ -3,16 +3,10 @@
 #define BIBLIOGRAPHY_H
 
 #include "String.h"
-#include "Publication.h"  
+#include "Publication.h" 
 #include "SystemInterface.h"
-// Manual placement new implementation
-#ifndef PLACEMENT_NEW_DEFINED
-#define PLACEMENT_NEW_DEFINED
-inline void* operator new(size_t size, void* ptr) {
-    (void)size;
-    return ptr;
-}
-#endif
+
+// Note: placement new is already defined in Publication.h
 
 class Bibliography {
 private:
@@ -40,7 +34,7 @@ private:
         }
 
         // If there's an existing array, copy existing publications into the new block
-        if (publications != nullptr && publicationCount > 0) {
+        if (publications != (Publication*)0 && publicationCount > 0) {
             for (int i = 0; i < publicationCount; i++) {
                 newPubs[i] = publications[i]; // uses Publication::operator=
             }
@@ -108,7 +102,7 @@ private:
         int start = eq + 1;
         while (start < n && (s[start] == ' ' || s[start] == '\t')) start++;
         bool brace = false;
-        if (start < n && (s[start] == '{' || s[start] == '\"')) {
+        if (start < n && (s[start] == '{' || s[start] == '"')) {
             brace = true;
             start++;
         }
@@ -162,11 +156,11 @@ private:
 
 public:
     // Constructors
-    Bibliography() : publications(nullptr), publicationCount(0), publicationCapacity(0) {}
+    Bibliography() : publications((Publication*)0), publicationCount(0), publicationCapacity(0) {}
 
     // Copy constructor
     Bibliography(const Bibliography& other) {
-        publications = nullptr;
+        publications = (Publication*)0;
         publicationCount = 0;
         publicationCapacity = 0;
 
