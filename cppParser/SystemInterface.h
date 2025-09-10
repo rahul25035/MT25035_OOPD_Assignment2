@@ -1,4 +1,3 @@
-// SystemInterface.h - Direct system calls, NO high-level stdio
 #ifndef SYSTEM_INTERFACE_H
 #define SYSTEM_INTERFACE_H
 
@@ -25,10 +24,9 @@ typedef long intptr_t;
 // File access modes (simple definitions kept from original)
 #define O_RDONLY 0
 #define O_WRONLY 1
-#define O_RDWR 2
+#define O_RDWR   2
 
 // System call interface using inline assembly (x86_64)
-// These wrappers return long (raw syscall return). Caller converts as needed.
 class SystemInterface {
 public:
     static long syscall1(long number, long arg1) {
@@ -77,7 +75,6 @@ public:
     }
 
     // Basic I/O operations
-    // Use (long)(intptr_t) for pointer arguments to avoid warnings
     static ssize_t read(int fd, void* buf, size_t count) {
         return (ssize_t)syscall3(SYS_read, (long)fd, (long)(intptr_t)buf, (long)count);
     }
@@ -86,7 +83,6 @@ public:
         return (ssize_t)syscall3(SYS_write, (long)fd, (long)(intptr_t)buf, (long)count);
     }
 
-    // open: use the 3-arg syscall. Passing 0 for mode is safe for read-only.
     static int open(const char* pathname, int flags) {
         long ret = syscall3(SYS_open, (long)(intptr_t)pathname, (long)flags, (long)0);
         return (int)ret;
@@ -103,54 +99,23 @@ public:
     }
 
     // sbrk-like allocator wrapper using brk syscall.
-    // Behavior:
-    // - syscall1(SYS_brk, 0) returns current program break (or -1 on error).
-    // - syscall1(SYS_brk, addr) returns the new break address on success, or a value != addr on failure.
-    // In SystemInterface.h - Fix sbrk method
-static void* sbrk(long increment) {
-    static char* current_brk = nullptr;
-    static bool initialized = false;
-    
-    // Thread-safe initialization
-    if (!initialized) {
-        long initial = syscall1(SYS_brk, 0);
-        if (initial == -1) {
+    static void* sbrk(long increment) {
+        // Query current break
+        long current = syscall1(SYS_brk, 0);
+        if (current == -1) {
             return (void*)-1;
         }
-        current_brk = (char*)(intptr_t)initial;
-        initialized = true;
-    }
-    
-    if (increment == 0) {
-        return (void*)current_brk;
-    }
-    
-    // Align increment to word boundary
-    if (increment > 0) {
-        increment = (increment + 7) & ~7;  // Align to 8-byte boundary
-    }
-    
-    char* old_brk = current_brk;
-    char* desired_brk = current_brk + increment;
-    
-    long brk_ret = syscall1(SYS_brk, (long)(intptr_t)desired_brk);
-    
-    if (brk_ret == (long)(intptr_t)desired_brk) {
-        current_brk = desired_brk;
-        
-        // Initialize new memory to zero if expanding
-        if (increment > 0) {
-            for (long i = 0; i < increment; i++) {
-                old_brk[i] = '\0';
-            }
-        }
-        
-        return (void*)old_brk;
-    } else {
-        return (void*)-1;
-    }
-}
 
+        long desired = current + increment;
+        // Try to set new break
+        long result = syscall1(SYS_brk, desired);
+        if (result != desired) {
+            return (void*)-1;
+        }
+
+        // Return the start of the newly allocated block (old break)
+        return (void*)(intptr_t)current;
+    }
 };
 
 #endif // SYSTEM_INTERFACE_H
