@@ -2,33 +2,30 @@
 #ifndef SYSTEM_INTERFACE_H
 #define SYSTEM_INTERFACE_H
 
-// Minimal standard headers for fixed-width and size types.
-// These do NOT pull in iostreams or high-level C++ I/O.
-#include <cstddef>  // for size_t
-#include <cstdint>  // for intptr_t, etc.
+// Define our own types instead of including standard headers
+typedef unsigned long size_t;
+typedef long ssize_t;
+typedef long intptr_t;
 
 /*
  * System call numbers for Linux x86_64
  */
-#define SYS_read    0
-#define SYS_write   1
-#define SYS_open    2
-#define SYS_close   3
-#define SYS_exit    60
-#define SYS_brk     12
+#define SYS_read 0
+#define SYS_write 1
+#define SYS_open 2
+#define SYS_close 3
+#define SYS_exit 60
+#define SYS_brk 12
 
 // File descriptors
-#define STDIN_FILENO  0
+#define STDIN_FILENO 0
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2
 
 // File access modes (simple definitions kept from original)
 #define O_RDONLY 0
 #define O_WRONLY 1
-#define O_RDWR   2
-
-// Basic integer types used by the interface
-typedef long ssize_t;   // keep compatible with your previous code
+#define O_RDWR 2
 
 // System call interface using inline assembly (x86_64)
 // These wrappers return long (raw syscall return). Caller converts as needed.
@@ -107,13 +104,13 @@ public:
 
     // sbrk-like allocator wrapper using brk syscall.
     // Behavior:
-    //  - syscall1(SYS_brk, 0) returns current program break (or -1 on error).
-    //  - syscall1(SYS_brk, addr) returns the new break address on success, or a value != addr on failure.
+    // - syscall1(SYS_brk, 0) returns current program break (or -1 on error).
+    // - syscall1(SYS_brk, addr) returns the new break address on success, or a value != addr on failure.
     static void* sbrk(long increment) {
-        static char* current_brk = nullptr;
+        static char* current_brk = (char*)0;
 
         // Initialize current break
-        if (current_brk == nullptr) {
+        if (current_brk == (char*)0) {
             long initial = syscall1(SYS_brk, 0);
             if (initial == -1) {
                 return (void*)-1;
