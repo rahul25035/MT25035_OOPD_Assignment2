@@ -1,0 +1,313 @@
+@inproceedings{aichallengeiot21,
+    abbr = {AICHALLENGEIoT@Sensys},
+    abstract = {Users are surrounded by sensors that are available through various devices beyond their smartphones. However, these sensors are not fully utilized by current end-user applications. A key reason sensor use is so limited is that application developers must exactly identify how the sensor data can be used by smartphone apps. To mitigate this problem, we present SenseWear, a sensor-sharing platform that extends the functionality of a smartphone to use remote sensors with limited additional developer effort. Sensor sharing has several uses, including augmenting the hardware in smartphones, creating new gestural interactions with smartphone applications, and improving application's Quality of Experience via higher-quality sensors from other devices, such as wearables. We developed and present six use cases that use remote sensors in various smartphone applications. Each extension requires adding fewer than 20 lines of code on average. Furthermore, using remote sensors did not introduce a perceptible increase in latency, and creates more convenient interaction options for smartphone apps.},
+    author = {Xu, Jian and Bhattacharya, Arani and Balasubramanian, Aruna and Porter, Donald E.},
+    booktitle = {International Workshop on Challenges in Artificial Intelligence and Machine Learning for Internet of Things, In Conjunction with Sensys},
+    doi = {10.1145/3485730.3493451},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/sensys-workshop21.pdf},
+    title = {Sensor Virtualization for Efficient Sharing of Mobile and Wearable Sensors},
+    year = {2021}
+}
+
+@inproceedings{atc24,
+    abbr = {ATC},
+    abstract = {With traffic surveillance increasingly used, thousands of cameras on roads send video feeds to cloud servers to run computer vision algorithms, requiring high bandwidth. State-of-the-art techniques reduce the bandwidth requirement by either sending a limited number of frames/pixels/regions or relying on re-encoding the important parts of the video. This imposes significant overhead on both the camera side and server side compute as re-encoding is expensive. In this work, we propose TILECLIPPER, a system that utilizes tile sampling, where a limited number of rectangular areas within the frames, known as tiles, are sent to the server. TILECLIPPER selects the tiles adaptively by utilizing its correlation with the tile bitrates. We evaluate TILECLIPPER on different datasets having 55 videos in total to show that, on average, our technique reduces ≈ 22\% of data sent to the cloud while providing a detection accuracy of 92\% with minimal calibration and compute compared to prior works. We show real-time tile filtering of TILECLIPPER even on cheap edge devices like Raspberry Pi 4 and nVidia Jetson Nano. We further create a live deployment of TILECLIPPER to show that it provides over 87\% detection accuracy and over 55\% bandwidth savings.},
+    author = {Chaudhary, Shubham and Taneja, Aryan and Singh, Anjali and Roy, Purbasha and Sikdar, Sohum and Maity, Mukulika and Bhattacharya, Arani},
+    booktitle = {USENIX Annual Technical Conference},
+    code = {https://github.com/shubhamchdhary/TileClipper},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/atc24.pdf},
+    ppt = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/atc24-ppt.pdf},
+    title = {TileClipper: Lightweight Selection of Regions of Interest from Videos for Traffic Surveillance},
+    year = {2024}
+}
+
+@inproceedings{comcom24,
+    abbr = {COMCOM},
+    abstract = {Light fidelity (LiFi) is an emerging wireless networking technology of visible light communication (VLC) paradigm for multiuser communication. This technology enables high data rates due to the availability of large visible light spectrum. While current studies have shown the potential for LiFi technology, they borrow the MAC-layer protocols from traditional WiFi. However, a number of prior studies have shown the challenges faced by the MAC-layer of WiFi in the presence of large number and types of devices. In this work, we show that the hybrid-coordination-function-controlled-access (HCCA) MAC protocol in LiFi provides higher throughput than the traditional CSMA/CA mechanism to user devices. We also show that HCCA has the limitation of higher message overhead in the presence of a large number of devices. We also evaluate the collision probability, busy channel probability, and delay for HCCA and CSMA/CA MAC protocol. We utilize both theoretical analysis and extensive simulations to study these performance tradeoffs and identify a threshold when a LiFi access point should switch to HCCA from CSMA/CA and vice-versa. Finally, based on our findings, we design a hybrid-MAC mechanism that switches between HCCA and CSMA/CA based on the number and type of devices present. Our evaluation shows that this hybrid mechanism can outperform both HCCA and CSMA/CA individually in the presence of different number of devices.},
+    author = {Paramita, Saswati and Bhattacharya, Arani and Bohara, Vivek Ashok and Srivastava, Anand},
+    booktitle = {Computer Communications},
+    doi = {10.1016/j.comcom.2024.06.017},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/comcom24.pdf},
+    title = {Hybrid CSMA/CA and HCCA uplink medium access control protocol for VLC based heterogeneous users},
+    year = {2024}
+}
+
+@inproceedings{compass25,
+    abbr = {JCSS},
+    abstract = {Despite significant improvements, smartphones are still constrained by the limited capacity of their batteries. Modern smartphones tend to use organic light-emitting diode (OLED) displays, whose energy consumption depends both on the brightness and the color content. Since the display of smartphones is known to consume a significant portion of this energy, a number of prior systems have tried to reduce screen brightness, increase areas of dark zones on the screen or use colors that consume less energy to mitigate this problem. However, the amount of energy savings using these techniques are still limited, as the underlying compute required to render the content still consumes energy. In this work, we provide a framework FlexDisplay that disables the display of a limited portion of the app content, saves the underlying compute needed to render the content as well as the touch sensors in the corresponding display area. FlexDisplay supports disabling of content across multiple apps. We implement FlexDisplay on two different smartphones. We demonstrate it on $15$ apps over different genres and show that the energy savings vary from $10$\%--$47$\% of the total energy consumption of the smartphone, depending on the app and the disabled content. Furthermore, we show via user studies on 20 users that the changes made by \sysname do not hurt their experience significantly.},
+    author = {Goel, Anshak and Mondal, Deeptorshi and Singh, Manavjeet and Goyal, Sahil and Aggarwal, Navneet and Xu, Jian and Maity, Mukulika and Bhattacharya, Arani},
+    booktitle = {ACM Journal on Computating and Sustainable Societies},
+    doi = {10.1145/3748822},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/jcss25.pdf},
+    title = {FlexDisplay: An Optimized Smartphone Display Framework To Conserve Battery Power},
+    year = {2025}
+}
+
+@inproceedings{comsnets22,
+    abbr = {COMSNETS},
+    abstract = {The increase in cost and usage of RF spectrum has made it increasingly necessary to monitor its usage and protect it from unauthorized use. A number of prior studies have designed algorithms to localize unauthorized transmitters using crowdsourced sensors. To reduce the cost of crowdsourcing, these studies select the most relevant sensors a priori to localize such transmitters. In this work, we instead argue for online selection to localize such transmitters. Online selection can lead to more accurate localization using limited number of sensors, as compared to selecting sensors a priori, albeit at the cost of higher latency. To account for the trade-off between accuracy and latency, we a constraint on the number of selection rounds. For the case where the number of rounds is equal to the number of selected sensors, we propose a heuristic based on Thompson Sampling and show using trace-driven simulation that it provides 23\% better accuracy compared to a number of proposed baseline algorithms. For restricted number of rounds, we show that using conventional parallel version of the modified Thompson Sampling which selects equal number of sensors in each round results in a substantial reduction in accuracy. To this end, we propose a strategy of selecting decreasing number of sensors in subsequent rounds of the modified Parallel Thompson Sampling. Our evaluation shows that the proposed heuristic leads to only 3\% reduction in accuracy in contrast to 22\% using modified Parallel Thompson Sampling, when we select 50 sensors in 20 rounds.},
+    author = {Bhattacharya, Arani and Maji, Abhishek and Champati, Jaya Prakash Verma and Gross, James},
+    booktitle = {International Conference on Communication Systems \& Networks},
+    doi = {10.1109/COMSNETS53615.2022.9668385},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/comsnets22.pdf},
+    ppt = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/comsnets22-ppt.pdf},
+    source = {"https://bitbucket.org/arani89/sensorselection-infocom/src/master/"},
+    title = {Fast Efficient Online Selection of Sensors for Transmitter Localization},
+    year = {2022}
+}
+
+@inproceedings{comsnets23,
+    abbr = {COMSNETS},
+    abstract = {The increasing urbanization in developing countries calls for more efficient and safer transportation systems. A key technique used to enhance such efficiency and/or safety is to utilize running of computer vision algorithms to identify obstructions that may come up, and notify vehicles in real-time. Such real-time detection and notification requires sufficient computation resources located logically and physically close to the cameras. While utilization of edge compute devices has been proposed in the literature, it is unclear how such devices with heterogeneous processing units can handle real-time detection while multi-tasking. In this work, we profile the performance of a few devices with embedded and desktop-quality GPUs, and show that the performance while multi-tasking can be modeled as a submodular function. We utilize this observation to model load-balancing of camera videos as an instance of a submodular welfare problem, and solve it using a greedy algorithm. Our extensive trace-driven simulations show that our technique outperforms the baseline by over 40\%.},
+    author = {Bhattacharya, Arani and Shukla, Paritosh and Banerjee, Ansuman and Jaipuria, Saumya and Nanjangud C. Narendra and Garg, Dhruv},
+    booktitle = {International Conference on Communication Systems \& Networks},
+    doi = {10.1109/COMSNETS56262.2023.10041358},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/comsnets23.pdf},
+    ppt = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/comsnets23-ppt.pdf},
+    title = {Multitask Scheduling of Computer Vision Workload on Edge Graphical Processing Units},
+    year = {2023}
+}
+
+@inproceedings{comsnets24,
+    abbr = {COMSNETS},
+    abstract = {    Roadside traffic monitoring is increasingly performed by deploying roadside high-resolution video cameras and then running computer vision (CV) models on the video data. Since computer vision models are compute-intensive as they utilize deep neural networks (DNNs), the data is usually sent to one or more edge servers located adjacent to mobile base stations, thereby keeping the in-situ (on camera) processing load as less as possible. Recent techniques propose running CV models on tiles of videos separately to detect and track small objects. Several CV models exist, each with different requirements of compute and memory. Since more compute and memory-intensive CV models provide higher accuracy, a key challenge of such techniques is to determine which vision model should be used on which tile. This becomes even more challenging if multiple videos are processed by the same edge server. In this paper, we first formulate this problem of model selection and
+tile allocation as an Integer Linear Programming (ILP) instance, and then propose an approximation algorithm based on linear relaxation followed by randomized rounding to solve it. We present experimental results of our methods on an open source dataset based on trace-driven simulation to show that it gives result fast enough while also reducing execution time in a variety of scenarios.},
+    author = {Jaipuria, Saumya and Banerjee, Ansuman and Bhattacharya, Arani},
+    booktitle = {International Conference on Communication Systems \& Networks},
+    doi = {10.1109/COMSNETS59351.2024.10427468},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/comsnets24.pdf},
+    title = {Roadside Traffic Monitoring using Video Processing on the Edge},
+    year = {2024}
+}
+
+@inproceedings{dyspan21,
+    abbr = {DYSPAN},
+    abstract = {Spectrum monitoring via crowdsourcing is a technique that promises to enable opportunistic spectrum access. Crowdsourcing aims to provide incentives to users to deploy a large number of cheap but potentially noisy sensors. The sensors all send their data to a fusion center, where typically some algorithms are used to remove the noise from the data. Such crowdsourced monitoring of spectrum has been shown to be feasible in practice in multiple studies. One of the key goals of such monitoring is to identify any users that are violating the protocols of accessing spectrum. While a number of crowdsourcing techniques to identify such violations have been proposed, a key challenge that remains is to minimize the cost of data consumption and energy of running the sensors. In this work, we propose sequential probing of sensors to accurately localize/identify such transmitters. We formulate this as a Gaussian Process multi-armed bandit problem, and use a widely known solution technique called Upper Confidence Bound to solve it. We next observe that such sequential probing incurs additional latency, and use batched selection of sensors in few rounds to reduce latency. We show that instead of naively selecting sensors in parallel batches, an intelligent technique of selecting sensors called Gaussian Process Adaptive Upper Confidence Bound (GP-AUCB) can lead to selection of sensors that can lead to more accurate localization. Finally, we show the tradeoff between accuracy of localization, latency incurred and number of selected sensors via simulations.},
+    author = {Ghosh, Aritrik and Bhattacharya, Arani},
+    booktitle = {IEEE International Symposium on Dynamic Spectrum Access Networks},
+    doi = {10.1109/DySPAN53946.2021.9677290},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/dyspan21.pdf},
+    ppt = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/dyspan21-ppt.pdf},
+    title = {A Gaussian Process Based Technique of Efficient Sensor Selection for Transmitter Localization},
+    year = {2021}
+}
+
+@inproceedings{eurosp24,
+    abbr = {EuroS\&P},
+    abstract = {Smartphone app usage has steeply risen in India in the past decade. But limited efforts in the past assess the privacy aspects of these smartphone apps. Many of these are used for common utilities and handle sensitive user data. Such sensitive data leaks can have a wide variety of consequences when exposed to untrusted players (e.g., repressive governments, data/content hosting companies, and other third parties). These could range from mere embarrassment to personal targeting and surveillance. This paper presents a measurement study on the data collection and privacy considerations of some of the most popular apps on the Indian Google Play Store. We analyzed the apps' data collection behavior on phones as well as the security of the servers to whom they send the data. We observed and categorized the data collected and transmitted to the backend hosting servers. This involved obfuscating the data transmitted and checking whether the app operations still function.Interestingly, for the non-government apps we found that extensive (mostly personally identifiable information), often "unnecessary", data collection was being performed. In other words, we observed that a lot of these apps work fine even without these pieces of sensitive information. Furthermore, we found that often such sensitive data may be available in plaintext to the intermediate players managing/deploying the hosting infrastructure. We also found that while the governmental services-based apps collect fewer such unnecessary data users, they often store the data on web-fronted back-end databases with little to no user authentication mechanisms enabled. We expect our study to enable better understanding among both users and app developers about the privacy implications of these data collection practices.},
+    author = {Kanungo, Koustuv and Bari, Aairah and Khatoliya, Rahul and Arora, Vishrut and Bhattacharya, Arani and Maity, Mukulika and Sambuddho},
+    booktitle = {IEEE European Security and Privacy Symposium},
+    doi = {10.1109/EuroSP60621.2024.00046},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/eurosp24.pdf},
+    title = {How Many Hands in the Cookie Jar? Examining Privacy Implications of Popular Apps in India},
+    year = {2024}
+}
+
+@inproceedings{icsoc20,
+    abbr = {ICSOC},
+    abstract = {In the era of Internet-of-things (IoT), both the number of web services and the number of users invoking them are increasing everyday. These web services utilize a cloud server for access to sufficient compute resources for service delivery. A disadvantage of cloud computing is that it is known to have a high latency because of its large distance (both physical distance as well as number of hops) from the end-user device. A key technique of enabling low-latency web services, called edge computing, brings the compute resources closer to the end device. Edge computing enables better resource utilization and it reduces latency. However, since there are numerous compute resources or `edge resources', determining where the services should be placed becomes a new challenge. In this paper, we consider the case of public transport vehicles utilizing edge computing to reduce latency while providing such web services. We first model the dynamic service placement problem considering user mobility. We then propose two algorithms to solve this problem. The first algorithm utilizes an Integer Linear Programming (ILP) to obtain an optimal solution, albeit at the cost of scalability. We then propose a heuristic algorithm to achieve a low latency, while also scaling to large problem instances. We validate the performance of both the techniques through extensive trace-driven simulations.},
+    author = {Mudam, Rahul and Bhartia, Saurabh and Chattopadhyay, Soumi and Bhattacharya, Arani},
+    booktitle = {International Conference on Service Oriented Computing (ICSOC)},
+    doi = {10.1007/978-3-030-65310-1_19},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/icsoc20.pdf},
+    title = {Mobility-Aware Service Placement for Vehicular Users in Edge-Cloud Environment},
+    year = {2020}
+}
+
+@inproceedings{icws21,
+    abbr = {ICWS},
+    abstract = {In recent times, the need for low latency has made it necessary  to  deploy  application  services  physically  and  logicallyclose to the users rather than using the cloud for hosting services. This  paradigm  of  computing,  known  as  edge  or  fog  computing,is becoming increasingly popular. An edge user allocation policy determines how to allocate service requests from mobile users to MEC servers. Current state-of-the-art techniques assume that the total resource utilization on an edge server is equal to the sum of the  individual  resource  utilizations  of  services  provisioned  from the edge server. However, the relationship between resources utilized on an edge server with the number of service requests served from  there  is  usually  highly  non-linear,  hence,  mathematically modelling the resource utilization is challenging. This is especially true  in  case  of  an  environment  with  CPU-GPU  co-execution,  as commonly  observed  in  modern  edge  computing.  In  this  work, we  provide  an  on-device  Deep Reinforcement Learning (DRL) framework to predict the resource utilization of incoming servicerequests from users, thereby estimating the number of users an edge server can accommodate for a given latency threshold. We further propose an algorithm to obtain the user allocation policy. We  compare  the  performance  of  the  proposed  DRL  framework with  traditional  allocation  approaches  and  show  that  the  DRLframework outperforms deterministic approaches by at least 10\% in  terms  of  the  number  of  users  allocated.},
+    author = {Panda, Subrat Prasad and Banerjee, Ansuman and Bhattacharya, Arani},
+    booktitle = {IEEE International Conference on Web Services},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/icws21.pdf},
+    title = {User Allocation in Mobile Edge Computing: A Deep Reinforcement Learning Approach},
+    year = {2021},
+    doi = {10.1109/ICWS53863.2021.00064}
+}
+
+@inproceedings{infocom20a,
+    abbr = {INFOCOM},
+    abstract = {We address the problem of localizing an (illegal) transmitter using a distributed set of sensors. Our focus is on developing techniques that perform the transmitter localization in an efficient manner. Localization of illegal transmitters is an important problem which arises in many important applications. Localization of transmitters is generally done based on observations from a deployed set of sensors with limited resources, thus it is imperative to design techniques that minimize the sensors' energy resources. In this paper, we design greedy approximation algorithms for the optimization problem of selecting a given number of sensors in order to maximize an appropriately defined objective function of localization accuracy. The obvious greedy algorithm delivers a constant-factor approximation only for the special case of two hypotheses (potential locations). For the general case of multiple hypotheses, we design a greedy algorithm based on an appropriate auxiliary objective function---and show that it delivers a provably approximate solution for the general case. We evaluate our techniques over multiple simulation platforms, including an indoor as well as an outdoor testbed, and demonstrate the effectiveness of our designed techniques---our techniques easily outperform prior and other approaches by up to 50-60\% in large-scale simulations.},
+    author = {Bhattacharya, Arani and Zhan, Caitao and Gupta, Himanshu and Das, Samir R. and Djuric, Petar M.},
+    booktitle = {IEEE International Conference on Communications (INFOCOM)},
+    doi = {10.1109/TNET.2021.3104000},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/infocom20a.pdf},
+    ppt = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/infocom20a-slides.pptx},
+    preprint = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/infocom20a-long.pdf},
+    title = {Selection of Sensors for Efficient Transmitter Localization},
+    video = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/infocom20a-video.mp4},
+    year = {2020}
+}
+
+@inproceedings{infocom20b,
+    abbr = {INFOCOM},
+    abstract = {360 videos provide an immersive experience to users, but require considerably more bandwidth to stream compared to regular videos. State-of-the-art 360◦ video streaming systems use viewport prediction to reduce bandwidth requirement, that involves predicting which part of the video the user will view and only fetching that content. However, viewport prediction is error prone resulting in poor user QoE. We design PARSEC, a 360 video streaming system that reduces bandwidth requirement while improving video quality. PARSEC trades off bandwidth for more client compute to achieve its goals. PARSEC uses a compression technique based on super resolution, where the video is significantly compressed at the server and the client runs a deep learning model to enhance the video to a much higher quality. PARSEC addresses a set of challenges associated with using super resolution for 360 video streaming: large deep learning models, high inference latency, and variance in the quality of the enhanced videos. To this end, PARSEC trains small micro-models over shorter video segments, and then combines traditional video encoding with super resolution techniques to overcome the challenges. We evaluate PARSEC on a real WiFi network, over a broadband network trace released by FCC, and over a 4G/LTE network trace.},
+    author = {Dasari, Mallesham and Bhattacharya, Arani and and Vargas, Santiago and Sahu, Pranjal and Balasubramanian, Aruna and Das, Samir R.},
+    booktitle = {IEEE International Conference on Communications (INFOCOM)},
+    doi = {10.1109/INFOCOM41043.2020.9155477},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/infocom20b.pdf},
+    ppt = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/infocom20b-slides.pdf},
+    title = {Streaming 360 Videos using Super-resolution},
+    year = {2020}
+}
+
+@inproceedings{mmsys25,
+    abbr = {MMSYS},
+    abstract = {The growing popularity of live online classes, even in remote areas, stresses the need for a good and seamless quality of experience to enhance learning. However, these bandwidth-hungry applications challenge the current cellular networks to maintain consistent bandwidth and latency. In this work, we, therefore, propose using the collaboration of multiple devices with their individual cellular networks to support such live video streaming. We design a content-aware system COMPACT that splits video into foreground and background using video tiles (independently encoded spatial blocks) and streams them over different paths. COMPACT depends on its scheduler, which exhaustively searches for the best quality based on the network estimates. We extensively evaluate our system using network traces while walking and traveling on the bus or car. Compared to the single path, COMPACT manages to reduce the median stall and E2E lag by 70.6\% and 28.57\%, and the tail stall and lag by 83.9\% and ≈ 80\% on a bus trace. Furthermore, we performed a live experiment to test Compact on the actual cellular network.},
+    author = {Chaudhary, Shubham and Mishra, Navneet and Gambhir, Keshav and Rajore, Tanmay and Bhattacharya, Arani and Maity, Mukulika},
+    booktitle = {ACM Multimedia Systems Conference},
+    code = {https://github.com/shubhamchdhary/COMPACT},
+    doi = {10.1145/3712676.3714451},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/mmsys25.pdf},
+    title = {COMPACT: Content-aware Multipath Live Video Streaming for Online Classes using Video Tiles},
+    year = {2025}
+}
+
+@inproceedings{mobihoc24,
+    abbr = {MOBIHOC},
+    abstract = {A key strategy for making production in factories more efficient is to collect data about the functioning of machines, and dynamically adapt their working. Such smart factories have data packets with a mix of stringent and non-stringent deadlines with varying levels of importance that need to be delivered via a wireless network. However, the scheduling of packets in the wireless network is crucial to satisfy the deadlines. In this work, we propose a technique of utilizing IEEE 802.11ax, popularly known as WiFi 6, for such applications. IEEE 802.11ax has a few unique characteristics, such as specific configurations of dividing the channels into resource units (RU) for packet transmission and synchronized parallel transmissions. We model the problem of scheduling packets by assigning profit to each packet and then maximizing the sum of profits. We first show that this problem is strongly NP-Hard, and then propose an approximation algorithm with a 12-approximate algorithm. Our approximation algorithm uses a variant of local search to associate the right RU configuration to each packet and identify the duration of each parallel transmission. Finally, we extensively simulate different scenarios to show that our algorithm works better than other benchmarks.},
+    author = {Jain, Mohit and Mishra, Anis and Wiese, Andrease and Das, Syamantak and Bhattacharya, Arani and Maity, Mukulika},
+    booktitle = {ACM International Symposium on Theory, Algorithmic Foundations, and Protocol Design for Mobile Networks and Mobile Computing},
+    code = {https://github.com/arani89/WiFi6-DeadlineScheduling},
+    doi = {10.1145/3641512.3686387},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/mobihoc24.pdf},
+    ppt = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/mobihoc24-ppt.pdf},
+    title = {A Deadline-Aware Scheduler for Smart Factory using WiFi 6},
+    year = {2024}
+}
+
+@inproceedings{percom24,
+    abbr = {WiP@PERCOM},
+    abstract = {Despite significant improvements, smartphones are still constrained by the limited capacity of their batteries.
+Modern smartphones tend to use organic light-emitting diode (OLED) displays, whose energy consumption depends both on the brightness and the color content.
+Since the display of smartphones is known to consume a significant portion of this energy, a number of prior systems have tried to reduce screen brightness, increase areas of dark zones on the screen or use colors that consume less energy to mitigate this problem. However, the amount of energy savings using these techniques are still limited, as the underlying compute required to render the content still consumes energy. In this work, we provide a framework FlexDisplay that disables the display of a limited portion of the app content, saves the underlying compute needed to render the content as well as the touch sensors in the corresponding display area. FlexDisplay supports disabling of content across multiple apps. We demonstrate it on $15$ apps over different genres and show that the energy savings vary from $10$\%--$47$\% of the total energy consumption of the smartphone, depending on the app and the disabled content.},
+    author = {Goel, Anshak and Mondal, Deeptorshi and Singh, Manavjeet and Goyal, Sahil and Agarwal, Navneet and Xu, Jian and Maity, Mukulika and Bhattacharya, Arani},
+    booktitle = {IEEE International Conference on Pervasive Computing and Communications Workshops and other Affiliated Events},
+    doi = {10.1109/PerComWorkshops59983.2024.10502958},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/percom24.pdf},
+    ppt = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/percom24-ppt.pdf},
+    title = {FlexDisplay: A Flexible Display Framework To Conserve Smartphone Battery Power},
+    year = {2024}
+}
+
+@inproceedings{tma24,
+    abbr = {TMA},
+    abstract = {A reliable way of estimating the location of an Internet host is to infer it from packet round-trip times between that host (the target) and several hosts in known locations (the landmarks). This technique is known as active geolocation. A major drawback of active geolocation is that it can be very slow, especially when many targets need to be located and when the landmarks are far away from the targets. In this work, we seek to improve the efficiency of active geolocation, by minimizing the number of landmarks used to locate a set of targets. We evaluate several algorithms for selecting an optimal set of landmarks from a larger pool: purely random selection, clustering based on geography and network topology, and incremental addition of landmarks far from those already used, according to two different distance metrics. We find that the most effective method is initial random selection of 100 landmarks, followed by incremental addition of landmarks while maximizing the Autonomous System (AS) and geographic diversity of the pool. Using this method, we can verify the location of a target using only 32\% of a pool of 780 landmarks, with the same accuracy as if the entire pool had been used. After deanonymization, we will make our code publicly available for others to use and improve upon.},
+    author = {Cho, Shinyoung and Weinberg, Zachary and Bhattacharya, Arani and Dai, Sophia and Rauf, Ramsha},
+    booktitle = {IFIP Network Traffic Measurement and Analysis Conference},
+    doi = {10.23919/TMA62044.2024.10559002},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/tma24.pdf},
+    ppt = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/tma24-ppt.pdf},
+    title = {Selection of Landmarks for Efficient Active Geolocation},
+    year = {2024}
+}
+
+@inproceedings{tnsm2021,
+    abbr = {TNSM},
+    abstract = {Conventional streaming solutions for streaming  360-degree\ panoramic videos are inefficient in that they download the entire 360-degree\ panoramic scene, while the user views only a small sub-part of the scene called the viewport. This can waste over 80\% of the network bandwidth. We develop a comprehensive approach called \adapvr that combines a powerful neural network-based viewport prediction with a rate control mechanism that assigns rates to different tiles in the 360-degree\ frame such that the video quality of experience is optimized subject to a given network capacity. We model the optimization as a multi-choice knapsack problem and solve it using a greedy approach. We also develop an end-to-end testbed using standards-compliant components and provide a comprehensive performance evaluation of \adapvr along with five other streaming techniques -- two for conventional adaptive video streaming and three for 360-degree\ tile-based video streaming. \adapvr outperforms the best of the competitions by as much as 47-191\% in terms of average video quality of experience. Simulation based evaluation as well as subjective user studies further confirm the superiority of the proposed approach.},
+    author = {Park, Sohee and Bhattacharya, Arani and Yang, Zhibo and Das, Samir R and Samaras, Dimitris},
+    booktitle = {IEEE Transactions on Network Service and Management},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/tnsm21.pdf},
+    title = {Mosaic: Advancing User Quality of Experience in 360-Degree Video Streaming with Machine Learning (Extended version of paper published in IFIP Networking 2019)},
+    year = {2021}
+}
+
+@inproceedings{tnsm25,
+    abbr = {TNSM},
+    abstract = {Optimizing tail latency while efficiently managing computational resources is crucial for delivering high-performance, latency-sensitive services in edge computing. Emerging applications, such as augmented reality, require low-latency computing services with high reliability on user devices, which often have limited computational capabilities. Consequently, these devices depend on nearby edge servers for processing. However, inherent uncertainties in network and computation latencies—stemming from variability in wireless networks and fluctuating server loads—make service delivery on time challenging. Existing approaches often focus on optimizing median latency but fall short of addressing the specific challenges of tail latency in edge environments, particularly under uncertain network and computational conditions. Although some methods do address tail latency, they typically rely on fixed or excessive redundancy and lack adaptability to dynamic network conditions, often being designed for cloud environments rather than the unique demands of edge computing. In this paper, we introduce SafeTail, a framework that meets both median and tail response time targets, with tail latency defined as latency beyond the \pni percentile threshold. SafeTail addresses this challenge by selectively replicating services across multiple edge servers to meet target latencies. SafeTail employs a reward-based deep learning framework to learn optimal placement strategies, balancing the need to achieve target latencies with minimizing additional resource usage. Through trace-driven simulations, SafeTail demonstrated near-optimal performance and outperformed most baseline strategies across three diverse services.},
+    author = {Shokhanda, Jyoti and Kumar, Aman and Pal, Utkarsh and Chattopadhyay, Soumi and Bhattacharya, Arani},
+    booktitle = {IEEE Transactions on Networks and Service Management},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/tnsm25.pdf},
+    title = {SafeTail: Tail Latency Optimization in Edge Service Scheduling via  Redundancy Management},
+    year = {2025},
+    doi = {10.1109/TNSM.2025.3587752},
+}
+
+@inproceedings{tomm25,
+    abbr = {ACM TOMM},
+    abstract = {Storing large volumes of traffic video content in clou storage is an expensive undertaking, given the limited capacity of cloud storage and its inability to store data beyond a few weeks. To address this issue, this paper introduces CLOUD-CODEC, a novel video encoding approach tailored specifically for traffic monitoring video. CLOUD-CODEC offers three key advantages: (i) real-time encoding without any delay, (ii) near-perfect video quality upon decoding, and (iii) one-fifth the storage size of traditional encoding methods. CLOUD-CODEC is generally applicable to traffic cameras under various weather and lighting conditions. The encoding algorithm is a lightweight DNN-based object detection and box shaped segmentation approach. The method can uniquely detect and segment cars, pedestrians, and moving objects with the marginal box shaped contours. Periodic object detection makes it possible for CLOUD-CODEC to operate in real-time and estimate the movement of objects between predictions. Proof-of-concept evaluations using a massive dataset indicate that CLOUD-CODEC reduces video size by 80\%—surpassing AV1 (34.9\%), CloudSeg (58.4\%), Detection (76.9\%), Segmentation (73.1\%), and Segm\&Sort (69.5\%). It achieves a frame rate of $95.8$ when encoding, and a VMAF score of $72.54$ after decoding, with a storage size that is one-fifth of traditional methods. Field-testing of CLOUD-CODEC on metropolitan traffic cameras demonstrates its ability to extend storage time by 74.92\%.},
+    author = {Kim, Hoyoung and Khudoyberdiev, Azimbek and Garnaik, Shubhangi S.R. and Bhattacharya, Arani and Ryoo, Jihoon},
+    booktitle = {ACM Transactions on Multimedia Computing, Communications, and Applications},
+    doi = {10.1145/3744649},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/tomm25.pdf},
+    title = {CLOUD-CODEC: A New Way of Storing Traffic Cameras Footage at Scale},
+    year = {2025}
+}
+
+@inproceedings{ton21,
+    abbr = {TON},
+    abstract = {We address the problem of localizing an (unauthorized) transmitter using a distributed set of sensors. Our focus is on developing techniques that perform the transmitter localization in an efficient manner, wherein the efficiency is defined in terms of the number of sensors used to localize. Localization of unauthorized transmitters is an important problem which arises in many important applications, e.g., in patrolling of shared spectrum systems for any unauthorized users. Localization of transmitters is generally done based on observations from a deployed set of sensors with limited resources, thus it is imperative to design techniques that minimize the sensors' energy resources. In this paper, we design greedy approximation algorithms for the optimization problem of selecting a given number of sensors in order to maximize an appropriately defined objective function of localization accuracy. The obvious greedy algorithm delivers a constant-factor approximation only for the special case of two hypotheses (potential locations). For the general case of multiple hypotheses, we design a greedy algorithm based on an appropriate auxiliary objective function---and show that it delivers a provably approximate solution for the general case. We develop techniques to significantly reduce the time complexity of the designed algorithms by incorporating certain observations and reasonable assumptions. We evaluate our techniques over multiple simulation platforms, including an indoor as well as an outdoor testbed, and demonstrate the effectiveness of our designed techniques---our techniques easily outperform prior and other approaches by up to 50-60\% in large-scale simulations and up to 16\% in small-scale testbeds.},
+    author = {Bhattacharya, Arani and Zhan, Caitao and Maji, Abhishek and Gupta, Himanshu and Das, Samir R. and Djuric, Petar M.},
+    booktitle = {IEEE/ACM Transactions on Networking},
+    code = {https://bitbucket.org/arani89/sensorselection-infocom/src/master/},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/ton21.pdf},
+    title = {Selection of Sensors for Efficient Transmitter Localization (Extended version of paper published in Infocom 2020)},
+    year = {2021},
+    doi = {10.1109/TNET.2021.3104000}
+}
+
+@inproceedings{tvt24,
+    abbr = {TVT},
+    abstract = {Light Fidelity (LiFi) is one of the most promising techniques to meet such high demand for indoor users by utilizing the visible light spectrum. A major challenge of LiFi is that its coverage is relatively limited, as the surrounding walls, objects, and other surfaces mostly absorb visible light. Thus, a number of studies have proposed aggregating the bandwidth of WiFi and LiFi to serve all users within a room. However, complementing LiFi with WiFi via bandwidth aggregation typically comes with an overhead in terms of both aggregation and computation, which reduces the data rates that can be used. Furthermore, data provided to users are often also limited by the backhaul capacity, which is typically wired Ethernet in indoor settings. In this work, the authors model the utilization of the functioning of WiFi and LiFi access points as a two-dimensional flow graph and show that the problem of maximizing the sum of data rate across all users is NP-Hard in practice. Then the authors design an algorithm FLADA to solve this problem by solving its relaxed version where the variables are treated as real numbers, and then rounding to the nearest integer. It is then proved formally that it provides a solution that is at least 0.5 times the optimal. The authors further compare it with a greedy baseline approach through extensive simulations and show that it outperforms it by up to 81.6\%.},
+    author = {Paramita, Saswati and Bhattacharya, Arani and Ahmad, Rizwana and Bohara, Vivek Ashok and Srivastava, Anand},
+    booktitle = {IEEE Transactions on Vehicular Technology},
+    doi = {10.1109/TVT.2024.3477310},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/tvt24.pdf},
+    title = {Flow-based Rate Maximization for Link Aggregation Enabled Hybrid LiFi-WiFi Network},
+    year = {2025}
+}
+
+@inproceedings{ubicomp25,
+    abbr = {UBICOMP / IMWUT},
+    abstract = {With the growing use cases of CSI-based WiFi sensing, future WiFi networks are moving towards integrating sensing and communication (ISAC) by sharing the same frequency resources between data communication and WiFi sensing. However, it is known that WiFi sensing is detrimental to WiFi communication due to its expensive use of frequency resources for collecting CSI samples, limiting its effectiveness in ISAC. To address this challenge, we propose Slim-Sense, a novel approach to resource saving while maximizing the sensing accuracy. We first demonstrate that it is possible to perform accurate WiFi sensing without using the entire bandwidth. In fact, we can obtain close to maximum accuracy while utilizing only 24.42\% of the bandwidth and 25\% of the antennas. Obtaining such accuracy at low bandwidth requires the selection of the antennas and bandwidth that are most relevant for sensing activities. One of Slim-Sense's highlights is using a novel approach consisting of a Sparse Group Regularizer (SGR) and Hierarchical Reinforcement learning (HRL) technique to select the minimum optimal bandwidth resources for sensing while maximizing sensing accuracy. Considering the stochastic nature of the sensing environment and the difference in requirements of different sensing applications, Slim-Sense provides an environment and application-specific bandwidth resources for sensing. We evaluate Slim-Sense with four different WiFi CSI datasets, each varying in sensing environment and application, including one we collected in 46 different environmental settings. The experimental evaluation shows that Slim-Sense saves up to 92.9\% resources while incurring < 5\% reduction in sensing accuracy compared to using entire spectrum resources. We show that Slim-Sense is generalized to different environments and sensing models. Compared to the state-of-art solution, Slim-Sense outperforms and achieves a maximum improvement of 28.75\% in resource-saving and 42.18\% in sensing accuracy.},
+    author = {Singh, Vijay Kumar and Walecha, Aryan and Gera, Ashutosh and Jay, Rishabh and Bhattacharya, Arani and Maity, Mukulika},
+    booktitle = {Proceedings of the ACM on Interactive, Mobile, Wearable and Ubiquitous Technologies},
+    doi = {10.1145/3712271},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/imwut25.pdf},
+    title = {SLIM-SENSE: A Resource Efficient WiFi Sensing Framework towards Integrated Sensing and Communication},
+    year = {2025}
+}
+
+@inproceedings{vtc24,
+    abbr = {VTC},
+    abstract = {In recent years, LiFi has become increasingly popular as an indoor communication technology that utilizes the unlicensed visible light and infra-red spectrum to transmit data. A major challenge of utilizing LiFi is that its area of coverage is limited. Thus, a large number of LiFi access points (APs) is often complemented by deploying a WiFi AP to form a hybrid WiFi/LiFi network. However, such deployment does not lead to any additional improvement in the performance of WiFi or LiFi APs. Recent WiFi APs are known to have high overhead due to the requirement of channel state information (CSI), which is essential for utilizing spatial multiplexing. Thus, in this work, we propose a system called WiLiConnect (WiFi-LiFi Connectivity with CSI), which communicates the CSI requirement of the WiFi channel through the LiFi APs, thereby reducing the overhead of WiFi APs. We formulate this problem of load-balancing the overhead of CSI sharing across the LiFi APs, and show that the general problem is NP-Hard. We then propose a round-robin algorithm to solve a special case of the problem, where all the users are assumed to have a single antenna. We further utilize extensive simulation to show that WiLiConnect significantly reduces the overhead of sending CSI. Specifically, WiLiConnect incurs only 0.06\% overhead on a WiFi AP having 8 antennas on the total sum rate.},
+    author = {Paramita, Saswati and Bhattacharya, Arani and Bohara, Vivek Ashok and Srivastava, Anand},
+    booktitle = {IEEE Vehicular Technology Conference},
+    doi = {10.1109/VTC2024-Spring62846.2024.10683067},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/vtc24.pdf},
+    title = {WiLiConnect: A Novel CSI Sharing Technique in Hybrid WiFi/LiFi Networks},
+    year = {2024}
+}
+
+@inproceedings{wacv21,
+    abbr = {WACV},
+    abstract = {For bandwidth-efficient streaming of 360-degree videos, the streaming technique must adapt both to the changing viewport of the user and variations of the available network bandwidth. The state-of-the-art streaming techniques for this problem attempt to solve an optimization using simplied rules that do not adapt very well to the uncertainties related to the viewport or network. We adopt a 3D-Convolutional Neural Networks (3DCNN) model to extract spatio-temporal features of videos and predict the viewport. Given the sequential decision-making nature of such streaming technique, we then apply a Reinforcement Learning (RL) based adaptive streaming approach. We address the challenges of using RL in this scenario, such as large action space and delayed re-ward evaluation. Comprehensive evaluations with real net-work traces show that the proposed method outperforms three tile-based streaming techniques for 360-degree videos. Compared to the tile-based streaming techniques, the average user-perceived bitrate of the proposed method is 1.3–1.7 times higher and the average quality of experience of the proposed method is also 1.6–3.4 times higher. Subjective user studies further conrm the superiority of the proposed approach.},
+    author = {Park, Sohee and Hoai, Minh and Bhattacharya, Arani and Das, Samir R.},
+    booktitle = {Winter Conference on Applications of Computer Vision},
+    doi = {10.1109/WACV48630.2021.00188},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/wacv21.pdf},
+    title = {Adaptive Streaming of 360-Degree Videos with Reinforcement Learning},
+    year = {2021}
+}
+
+@inproceedings{web20,
+    abbr = {WEB},
+    abstract = {Consumer IoT is characterized by heterogeneous devices with diverse functionality and programming interfaces. This lack of homogeneity makes the integration and security management of IoT infrastructures a daunting task for users and administrators. In this paper, we introduce VISCR, a Vendor-Independent policy Specification and Conflict Resolution engine that enables conflict-free policy specification and enforcement in IoT environments. VISCR converts the topology of the IoT infrastructure into a tree-based abstraction and translates existing policies from heterogeneous vendor-specific programming languages such as Groovy-based SmartThings, OpenHAB, IFTTT-based templates, and MUD-based profiles into a vendor-independent graph-based specification. Using the two, VISCR can automatically detect rouge policies, conflicts, and bugs for coherent automation. Upon detection, VISCR infers new policies and proposes them to users as alternatives to existing policies for fine-tuning and conflict-free enforcement. We evaluated VISCR using a dataset of 907 IoT apps, programmed using heterogeneous automation specifications in a simulated smart-building IoT infrastructure. In our experiments, among 907 IoT apps, VISCR exposed 342 of IoT apps as exhibiting one or more violations. VISCR detected 100% of violations reported by existing state-of-the-art tool, while detecting new types of violations in an additional 266 apps. In terms of performance, VISCR can generate 400 abstraction trees (used in specifying policies) with 100K leaf nodes in <1.2sec. In our experiments, VISCR took 80.7 seconds to analyze our infrastructure of 907 apps; a 14.2× reduction compared to the state-of-the-art. After the initial analysis, VISCR is capable of adopting new policies in sub-second latency to handle changes.},
+    author = {Nagendra, Vasudevan and Bhattacharya, Arani and Yegneswaran, Vinod and Rahmati, Amir and Das, Samir R.},
+    booktitle = {The Web Conference},
+    doi = {10.1145/3366423.3380234},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/web20.pdf},
+    title = {An Intent-Based Automation Framework for Securing Dynamic Consumer IoT Infrastructures},
+    year = {2020}
+}
+
+@inproceedings{wowmom20,
+    abbr = {WOWMOM},
+    abstract = {GNSS/GPS is a positioning system widely used nowadays in our lives for real-time localization in Earth. This technology is highly vulnerable to spoofing/jamming attacks caused by malicious intruders. In the recent years, commodity and low-cost radio-frequency hardware have been used to interfere with the legitimate GPS signal. Existing spoofing detection solutions use costly receivers and computationally expensive algorithms which limit the large-scale deployment. In this work we propose a GNSS spoofing detection system that can run on spectrum sensors with Software-Defined Radio (SDR) capabilities and cost in the order of 20 euros. Our approach exploits the predictability of the Doppler characteristics of the received GPS signals to determine the presence of anomalies or malicious attackers. We propose an artificial recurrent neural network (RNN) based on Long short-term memory (LSTM) for anomaly detection. We use data received by low-cost SDR receivers that are processed locally by low-cost embedded machines such as Nvidia Jetson Nano to provide inference capabilities. We show that our solution predicts very accurately the Doppler shift of GNSS signals and can determine the presence of a spoofing transmitter.},
+    author = {Calvo-Palomino, Roberto and Bhattacharya, Arani and Bovet, Gerome and Giustiniano, Domenico},
+    booktitle = {IEEE International Symposium on a World of Wireless, Mobile and Multimedia Networks (WOWMOM)},
+    doi = {10.1109/WoWMoM49955.2020.00055},
+    pdf = {https://faculty.iiitd.ac.in/%7Earani/assets/pdf/wowmom20.pdf},
+    title = {LSTM-based GNSS Spoofing Detection Using Low-cost Spectrum Sensors},
+    year = {2020}
+}
