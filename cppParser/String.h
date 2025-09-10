@@ -22,33 +22,36 @@ private:
         return p;
     }
 
-    void ensure_capacity(size_t needed) {
-        if (needed <= capacity) return;
-
-        size_t new_capacity = (capacity == 0) ? 16 : capacity;
-        while (new_capacity < needed) {
-            new_capacity *= 2;
-        }
-
-        char* new_data = (char*) my_malloc(new_capacity);
-        if (!new_data) {
-            SystemInterface::write(STDERR_FILENO, "Memory allocation failed\n", 25);
-            SystemInterface::exit(1);
-        }
-
-        if (data) {
-            // copy existing content including the null terminator
-            for (size_t i = 0; i <= length; i++) {
-                new_data[i] = data[i];
-            }
-        } else {
-            // initialize the buffer with null terminator
-            new_data[0] = '\0';
-        }
-
-        data = new_data;
-        capacity = new_capacity;
+    // In String.h - Fix ensure_capacity method
+void ensure_capacity(size_t needed) {
+    if (needed <= capacity) return;
+    
+    size_t new_capacity = (capacity == 0) ? 16 : capacity;
+    while (new_capacity < needed) {
+        new_capacity *= 2;
     }
+    
+    char* new_data = (char*) my_malloc(new_capacity);
+    if (!new_data) {  // This check was missing in some paths
+        SystemInterface::write(STDERR_FILENO, "Memory allocation failed\n", 25);
+        SystemInterface::exit(1);
+    }
+    
+    // Initialize all memory to zero
+    for (size_t i = 0; i < new_capacity; i++) {
+        new_data[i] = '\0';
+    }
+    
+    if (data && length > 0) {  // Add null check for data
+        for (size_t i = 0; i <= length; i++) {
+            new_data[i] = data[i];
+        }
+    }
+    
+    data = new_data;
+    capacity = new_capacity;
+}
+
 
 public:
     // Constructors

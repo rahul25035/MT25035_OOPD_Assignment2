@@ -8,32 +8,28 @@
 // Input/Output helpers (no scanf/printf)
 class IOHelper {
 public:
-    static String readLine() {
-        char buffer[1024];
-        int pos = 0;
-        char c;
-        ssize_t r;
-
-        // Read until newline or EOF or buffer full-1
-        while ((r = SystemInterface::read(STDIN_FILENO, &c, 1)) > 0) {
-            if (c == '\n') break;
-            if (pos < 1023) {
-                buffer[pos++] = c;
-            } else {
-                // buffer full - stop reading further characters for this line
-                break;
-            }
+    // In main.cpp - Fix readLine method
+static String readLine() {
+    char buffer[1024];
+    int pos = 0;
+    char c;
+    ssize_t r;
+    
+    while ((r = SystemInterface::read(STDIN_FILENO, &c, 1)) > 0) {
+        if (c == '\n') break;
+        if (pos < 1022) {  // Leave room for null terminator and safety
+            buffer[pos++] = c;
+        } else {
+            // Skip remaining characters until newline
+            while ((r = SystemInterface::read(STDIN_FILENO, &c, 1)) > 0 && c != '\n');
+            break;
         }
-
-        // If no characters read and EOF reached, return empty String
-        if (r <= 0 && pos == 0) {
-            buffer[0] = '\0';
-            return String(buffer);
-        }
-
-        buffer[pos] = '\0';
-        return String(buffer);
     }
+    
+    buffer[pos] = '\0';
+    return String(buffer);
+}
+
 
     static void printUsage(const String& programName) {
         SystemInterface::write(STDOUT_FILENO, "Usage: ", 7);
@@ -88,17 +84,33 @@ struct CommandLineArgs {
     CommandLineArgs() : program_name(), bib_file(), institute_name(), valid(false) {}
 };
 
+// In main.cpp - Fix parseCommandLine
 CommandLineArgs parseCommandLine(int argc, char* argv[]) {
     CommandLineArgs args;
-
-    // Expect exactly 2 program arguments in addition to argv[0]
+    
+    // Basic validation
     if (argc != 3) {
         args.valid = false;
-        if (argc > 0 && argv[0]) {
-            args.program_name = String(argv[0]);
+        if (argc > 0 && argv && argv) {  // Add null checks
+            args.program_name = String(argv);
         }
         return args;
     }
+    
+    // Validate all arguments are non-null
+    if (!argv || !argv || !argv || !argv) {
+        args.valid = false;
+        return args;
+    }
+    
+    args.program_name = String(argv);
+    args.bib_file = String(argv);
+    args.institute_name = String(argv);
+    args.valid = true;
+    
+    return args;
+}
+
 
     args.program_name = String(argv[0]);
     args.bib_file = String(argv[1]);

@@ -76,52 +76,65 @@ private:
 
     // BibTeX parsing helper functions
     // Extract field value after 'fieldName' in the line. Returns empty String if not found.
-    String extractFieldValue(const String& line, const String& fieldName) {
-        if (line.empty() || fieldName.empty()) return String();
-
-        // Find the field name followed by optional whitespace and '='
-        int pos = line.find(fieldName);
-        if (pos == -1) return String();
-
-        const char* s = line.c_str();
-        int n = (int)line.size();
-
-        // Move to the '=' after the field name
-        int eq = -1;
-        for (int i = pos + (int)fieldName.size(); i < n; i++) {
-            if (s[i] == '=') {
-                eq = i;
-                break;
-            }
-            // skip whitespace between field name and '='
-            if (s[i] != ' ' && s[i] != '\t') break;
+    // In Bibliography.h - Fix extractFieldValue method
+String extractFieldValue(const String& line, const String& fieldName) {
+    if (line.empty() || fieldName.empty()) return String();
+    
+    int pos = line.find(fieldName);
+    if (pos == -1) return String();
+    
+    const char* s = line.c_str();
+    if (!s) return String();  // Add null check
+    
+    int n = (int)line.size();
+    if (n == 0) return String();
+    
+    // Find '=' after field name with bounds checking
+    int eq = -1;
+    int start_pos = pos + (int)fieldName.size();
+    
+    if (start_pos >= n) return String();  // Bounds check
+    
+    for (int i = start_pos; i < n; i++) {
+        if (s[i] == '=') {
+            eq = i;
+            break;
         }
-        if (eq == -1) return String();
-
-        // Move to start of value (skip whitespace and opening { or " )
-        int start = eq + 1;
-        while (start < n && (s[start] == ' ' || s[start] == '\t')) start++;
-        bool brace = false;
-        if (start < n && (s[start] == '{' || s[start] == '"')) {
-            brace = true;
-            start++;
-        }
-
-        // Find end of value: matching brace or comma/closing brace or closing quote
-        int end = start;
-        if (brace) {
-            // look for closing brace - be simple: find next '}' in this line
-            while (end < n && s[end] != '}') end++;
-        } else {
-            while (end < n && s[end] != ',' && s[end] != '}' && s[end] != '\n' && s[end] != '\r') end++;
-        }
-
-        if (end <= start) return String();
-
-        // Create substring and trim
-        String value = line.substr((size_t)start, (size_t)(end - start)).trim();
-        return value;
+        if (s[i] != ' ' && s[i] != '\t') break;
     }
+    if (eq == -1 || eq + 1 >= n) return String();  // Bounds check
+    
+    // Rest of the method with proper bounds checking...
+    int value_start = eq + 1;
+    while (value_start < n && (s[value_start] == ' ' || s[value_start] == '\t')) {
+        value_start++;
+    }
+    
+    if (value_start >= n) return String();
+    
+    bool has_delimiter = false;
+    char delimiter = '\0';
+    if (s[value_start] == '{' || s[value_start] == '"') {
+        has_delimiter = true;
+        delimiter = (s[value_start] == '{') ? '}' : '"';
+        value_start++;
+    }
+    
+    int value_end = value_start;
+    if (has_delimiter) {
+        while (value_end < n && s[value_end] != delimiter) value_end++;
+    } else {
+        while (value_end < n && s[value_end] != ',' && s[value_end] != '}' && 
+               s[value_end] != '\n' && s[value_end] != '\r') {
+            value_end++;
+        }
+    }
+    
+    if (value_end <= value_start) return String();
+    
+    return line.substr((size_t)value_start, (size_t)(value_end - value_start)).trim();
+}
+
 
     // Extract authors splitting on " and " (original C logic)
     void extractAuthors(const String& authorField, Publication& pub) {

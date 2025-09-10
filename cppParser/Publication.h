@@ -29,36 +29,51 @@ private:
     int authorCount;
     int authorCapacity;
 
-    void ensureAuthorCapacity() {
-        if (authorCount < authorCapacity) return;
-        
-        int newCapacity = (authorCapacity == 0) ? 4 : authorCapacity * 2;
-        size_t totalBytes = (size_t)newCapacity * sizeof(Author);
-        long bytes = (long)totalBytes;
-
-        void* raw = SystemInterface::sbrk(bytes);
-        if (raw == (void*)-1) {
-            SystemInterface::write(STDERR_FILENO, "Memory allocation failed\n", 25);
-            SystemInterface::exit(1);
-        }
-
-        Author* newAuthors = (Author*)raw;
-
-        // Construct Author objects in-place
-        for (int i = 0; i < newCapacity; i++) {
-            new (newAuthors + i) Author();
-        }
-
-        // Copy existing authors
-        if (authors != (Author*)0 && authorCount > 0) {
-            for (int i = 0; i < authorCount; i++) {
-                newAuthors[i] = authors[i];
-            }
-        }
-
-        authors = newAuthors;
-        authorCapacity = newCapacity;
+    // In Publication.h - Fix ensureAuthorCapacity
+void ensureAuthorCapacity() {
+    if (authorCount < authorCapacity) return;
+    
+    int newCapacity = (authorCapacity == 0) ? 4 : authorCapacity * 2;
+    
+    // Check for integer overflow
+    if (newCapacity < authorCapacity || newCapacity < 0) {
+        SystemInterface::write(STDERR_FILENO, "Capacity overflow\n", 18);
+        SystemInterface::exit(1);
     }
+    
+    size_t totalBytes = (size_t)newCapacity * sizeof(Author);
+    long bytes = (long)totalBytes;
+    
+    // Check for size overflow
+    if (totalBytes / sizeof(Author) != (size_t)newCapacity) {
+        SystemInterface::write(STDERR_FILENO, "Size calculation overflow\n", 26);
+        SystemInterface::exit(1);
+    }
+    
+    void* raw = SystemInterface::sbrk(bytes);
+    if (raw == (void*)-1) {
+        SystemInterface::write(STDERR_FILENO, "Memory allocation failed\n", 25);
+        SystemInterface::exit(1);
+    }
+    
+    Author* newAuthors = (Author*)raw;
+    
+    // Initialize ALL new memory with placement new
+    for (int i = 0; i < newCapacity; i++) {
+        new (newAuthors + i) Author();
+    }
+    
+    // Copy existing authors if any
+    if (authors != nullptr && authorCount > 0) {
+        for (int i = 0; i < authorCount; i++) {
+            newAuthors[i] = authors[i];
+        }
+    }
+    
+    authors = newAuthors;
+    authorCapacity = newCapacity;
+}
+
 
 public:
     // Constructors

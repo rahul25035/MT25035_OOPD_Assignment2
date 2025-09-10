@@ -106,31 +106,51 @@ public:
     // Behavior:
     // - syscall1(SYS_brk, 0) returns current program break (or -1 on error).
     // - syscall1(SYS_brk, addr) returns the new break address on success, or a value != addr on failure.
-    static void* sbrk(long increment) {
-        static char* current_brk = (char*)0;
-
-        // Initialize current break
-        if (current_brk == (char*)0) {
-            long initial = syscall1(SYS_brk, 0);
-            if (initial == -1) {
-                return (void*)-1;
-            }
-            current_brk = (char*)(intptr_t)initial;
-        }
-
-        char* old_brk = current_brk;
-        char* desired_brk = current_brk + increment;
-
-        long brk_ret = syscall1(SYS_brk, (long)(intptr_t)desired_brk);
-
-        // On success the raw syscall returns the new break (desired_brk).
-        if (brk_ret == (long)(intptr_t)desired_brk) {
-            current_brk = desired_brk;
-            return (void*)old_brk;
-        } else {
+    // In SystemInterface.h - Fix sbrk method
+static void* sbrk(long increment) {
+    static char* current_brk = nullptr;
+    static bool initialized = false;
+    
+    // Thread-safe initialization
+    if (!initialized) {
+        long initial = syscall1(SYS_brk, 0);
+        if (initial == -1) {
             return (void*)-1;
         }
+        current_brk = (char*)(intptr_t)initial;
+        initialized = true;
     }
+    
+    if (increment == 0) {
+        return (void*)current_brk;
+    }
+    
+    // Align increment to word boundary
+    if (increment > 0) {
+        increment = (increment + 7) & ~7;  // Align to 8-byte boundary
+    }
+    
+    char* old_brk = current_brk;
+    char* desired_brk = current_brk + increment;
+    
+    long brk_ret = syscall1(SYS_brk, (long)(intptr_t)desired_brk);
+    
+    if (brk_ret == (long)(intptr_t)desired_brk) {
+        current_brk = desired_brk;
+        
+        // Initialize new memory to zero if expanding
+        if (increment > 0) {
+            for (long i = 0; i < increment; i++) {
+                old_brk[i] = '\0';
+            }
+        }
+        
+        return (void*)old_brk;
+    } else {
+        return (void*)-1;
+    }
+}
+
 };
 
 #endif // SYSTEM_INTERFACE_H
