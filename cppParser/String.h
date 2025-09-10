@@ -12,9 +12,8 @@ private:
 
     // Allocate memory from sbrk and handle errors.
     static void* my_malloc(size_t size) {
-        // Avoid returning nullptr for size==0 callers may not expect nullptr.
         if (size == 0) size = 1;
-        void* p = SystemInterface::sbrk((long)(intptr_t)size);
+        void* p = SystemInterface::sbrk((long)size);
         if (p == (void*)-1) {
             SystemInterface::write(STDERR_FILENO, "Memory allocation failed\n", 25);
             SystemInterface::exit(1);
@@ -22,35 +21,39 @@ private:
         return p;
     }
 
-    // In String.h - Fix ensure_capacity method
-void ensure_capacity(size_t needed) {
-    if (needed <= capacity) return;
-    
-    size_t new_capacity = (capacity == 0) ? 16 : capacity;
-    while (new_capacity < needed) {
-        new_capacity *= 2;
-    }
-    
-    char* new_data = (char*) my_malloc(new_capacity);
-    if (!new_data) {  // This check was missing in some paths
-        SystemInterface::write(STDERR_FILENO, "Memory allocation failed\n", 25);
-        SystemInterface::exit(1);
-    }
-    
-    // Initialize all memory to zero
-    for (size_t i = 0; i < new_capacity; i++) {
-        new_data[i] = '\0';
-    }
-    
-    if (data && length > 0) {  // Add null check for data
-        for (size_t i = 0; i <= length; i++) {
-            new_data[i] = data[i];
+    void ensure_capacity(size_t needed) {
+        if (needed <= capacity) return;
+
+        // Compute new capacity (at least double until it fits)
+        size_t new_capacity = (capacity == 0) ? 16 : capacity;
+        while (new_capacity < needed) {
+            new_capacity *= 2;
         }
+
+        // Allocate raw memory
+        char* new_data = (char*) my_malloc(new_capacity);
+        if (!new_data) {  // unlikely, but check
+            SystemInterface::write(STDERR_FILENO, "Memory allocation failed\n", 25);
+            SystemInterface::exit(1);
+        }
+
+        // Initialize entire block to zero to avoid uninitialized reads
+        for (size_t i = 0; i < new_capacity; i++) {
+            new_data[i] = '\0';
+        }
+
+        // If we already had data, copy it (up to old length+1 for null)
+        if (data) {
+            for (size_t i = 0; i <= length; i++) {
+                new_data[i] = data[i];
+            }
+        }
+
+        // Switch to the new buffer
+        data = new_data;
+        capacity = new_capacity;
     }
-    
-    data = new_data;
-    capacity = new_capacity;
-}
+
 
 
 public:
