@@ -4,7 +4,7 @@
 # Compiler and flags
 CXX = g++
 CXXFLAGS = -Wall -Wextra -std=c++11 -O2 -fno-exceptions -fno-rtti
-LDFLAGS = -nostdlib -lc
+LDFLAGS = 
 
 # Target executable
 TARGET = bib-parser
@@ -14,7 +14,7 @@ SOURCES = main.cpp mystring.cpp author.cpp bibentry.cpp bibdatabase.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
 
 # Header files (for dependencies)
-HEADERS = mystring.h author.h bibentry.h bibdatabase.h
+HEADERS = mystring.h Author.h bibentry.h bibdatabase.h
 
 # Default target
 all: $(TARGET)
@@ -22,7 +22,7 @@ all: $(TARGET)
 # Link the executable
 $(TARGET): $(OBJECTS)
 	@echo "Linking $(TARGET)..."
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -o $@ $^
 	@echo "Build successful!"
 
 # Compile source files to object files
@@ -33,9 +33,9 @@ $(TARGET): $(OBJECTS)
 # Dependencies
 main.o: main.cpp bibdatabase.h
 mystring.o: mystring.cpp mystring.h
-author.o: author.cpp author.h mystring.h
-bibentry.o: bibentry.cpp bibentry.h mystring.h author.h
-bibdatabase.o: bibdatabase.cpp bibdatabase.h bibentry.h mystring.h author.h
+author.o: author.cpp Author.h mystring.h
+bibentry.o: bibentry.cpp bibentry.h mystring.h Author.h
+bibdatabase.o: bibdatabase.cpp bibdatabase.h bibentry.h mystring.h Author.h
 
 # Clean target
 clean:
