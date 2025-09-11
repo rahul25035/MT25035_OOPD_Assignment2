@@ -212,32 +212,30 @@ bool BibEntry::parse_entry_header(const MyString& header_line) {
         return false;
     }
 
-    // Extract entry type (@inproceedings, @article, etc.)
+    // Extract entry type
     entry_type = line.substr(1, brace_pos - 1);
     entry_type.trim();
     entry_type.to_lower();
 
-    // Determine where the key starts (just after the brace)
-    unsigned long key_start = brace_pos + 1;
-
-    // Find comma after the start of key
-    unsigned long comma_pos = line.find(",", key_start);
-    // If no comma found, look for closing brace instead
-    if (comma_pos == line.length()) {
-        comma_pos = line.find("}", key_start);
-    }
-    if (comma_pos == line.length()) {
-        // Malformed header: no delimiter after key
-        return false;
-    }
-
     // Extract entry key
-    entry_key = line.substr(key_start, comma_pos - key_start);
+    unsigned long key_start = brace_pos + 1;
+    unsigned long comma_pos = line.find(",", key_start);
+    if (comma_pos == line.length()) {
+        // No comma found, key extends to end or closing brace
+        unsigned long close_brace = line.find("}", key_start);
+        if (close_brace != line.length()) {
+            entry_key = line.substr(key_start, close_brace - key_start);
+        } else {
+            entry_key = line.substr(key_start);
+        }
+    } else {
+        entry_key = line.substr(key_start, comma_pos - key_start);
+    }
+
     entry_key.trim();
 
     return !entry_type.empty() && !entry_key.empty();
 }
-
 
 bool BibEntry::parse_field_line(const MyString& field_line) {
     MyString field_name, field_value;
