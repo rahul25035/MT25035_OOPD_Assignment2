@@ -1,5 +1,5 @@
 // author.cpp - Author class implementation
-#include "author.h"
+#include "Author.h"
 
 // Constructors
 Author::Author() : name(), affiliation() {}

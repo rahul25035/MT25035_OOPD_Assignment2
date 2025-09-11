@@ -1,6 +1,6 @@
 // bibentry.cpp - Bibliography entry class implementation
 #include "bibentry.h"
-#include "author.h"
+#include "Author.h"
 
 // Constructors
 BibEntry::BibEntry() : author_count(0) {

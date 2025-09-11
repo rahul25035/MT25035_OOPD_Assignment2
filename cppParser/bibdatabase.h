@@ -4,7 +4,7 @@
 
 #include "bibentry.h"
 #include "mystring.h"
-#include "author.h"
+#include "Author.h"
 
 // Simple vector-like container since we can't use std::vector
 template<typename T>
