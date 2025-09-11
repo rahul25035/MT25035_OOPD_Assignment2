@@ -14,7 +14,7 @@ SOURCES = main.cpp mystring.cpp author.cpp bibentry.cpp bibdatabase.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
 
 # Header files (for dependencies)
-HEADERS = mystring.h Author.h bibentry.h bibdatabase.h
+HEADERS = mystring.h Author.h bibentry.h bibdatabase.h placement_new.h
 
 # Default target
 all: $(TARGET)

@@ -1,12 +1,14 @@
-// bibdatabase.h - Bibliography database class definition
+// bibdatabase.h - Bibliography database class definition (FIXED VERSION)
 #ifndef BIBDATABASE_H
 #define BIBDATABASE_H
 
 #include "bibentry.h"
 #include "mystring.h"
 #include "Author.h"
+#include "placement_new.h"
 
-// Simple vector-like container since we can't use std::vector
+
+// Simple vector-like container since we can't use std::vector - COMPLETELY FIXED
 template<typename T>
 class MyVector {
 private:
@@ -19,10 +21,10 @@ private:
 
 public:
     MyVector();
-    MyVector(const MyVector<T>& other);
+    MyVector(const MyVector& other);
     ~MyVector();
 
-    MyVector<T>& operator=(const MyVector<T>& other);
+    MyVector& operator=(const MyVector& other);
 
     void push_back(const T& item);
     void clear();
@@ -76,7 +78,7 @@ public:
     const BibEntry* find_entry(const MyString& entry_key) const;
 
     // Database operations
-    void sort_entries(); // Sort by <year desc, title asc>
+    void sort_entries(); // Sort by <year descending, title ascending>
     void clear();
     bool empty() const;
     unsigned long size() const;
@@ -101,19 +103,19 @@ public:
     bool validate() const;
 };
 
-// Template implementation (simplified without placement new)
+// FIXED Template implementation - Using only malloc/free for consistency
 template<typename T>
 MyVector<T>::MyVector() : data(nullptr), size(0), capacity(0) {}
 
 template<typename T>
-MyVector<T>::MyVector(const MyVector<T>& other) : data(nullptr), size(0), capacity(0) {
+MyVector<T>::MyVector(const MyVector& other) : data(nullptr), size(0), capacity(0) {
     if (other.size > 0) {
-        capacity = other.size;
+        capacity = other.capacity;
         data = (T*)malloc(sizeof(T) * capacity);
         if (data) {
+            // Use placement new to properly construct objects
             for (unsigned long i = 0; i < other.size; i++) {
-                // Use copy constructor manually
-                data[i] = other.data[i];
+                new (&data[i]) T(other.data[i]); // Copy constructor
             }
             size = other.size;
         }
@@ -126,15 +128,16 @@ MyVector<T>::~MyVector() {
 }
 
 template<typename T>
-MyVector<T>& MyVector<T>::operator=(const MyVector<T>& other) {
+MyVector<T>& MyVector<T>::operator=(const MyVector& other) {
     if (this != &other) {
         deallocate();
         if (other.size > 0) {
-            capacity = other.size;
+            capacity = other.capacity;
             data = (T*)malloc(sizeof(T) * capacity);
             if (data) {
+                // Use placement new to properly construct objects
                 for (unsigned long i = 0; i < other.size; i++) {
-                    data[i] = other.data[i];
+                    new (&data[i]) T(other.data[i]); // Copy constructor
                 }
                 size = other.size;
             }
@@ -149,7 +152,8 @@ void MyVector<T>::push_back(const T& item) {
         resize();
     }
     if (data && size < capacity) {
-        data[size] = item;
+        // Use placement new to construct the object
+        new (&data[size]) T(item); // Copy constructor
         size++;
     }
 }
@@ -162,6 +166,10 @@ void MyVector<T>::clear() {
 template<typename T>
 void MyVector<T>::deallocate() {
     if (data) {
+        // Call destructors for all constructed objects
+        for (unsigned long i = 0; i < size; i++) {
+            data[i].~T();
+        }
         free(data);
         data = nullptr;
     }
@@ -175,9 +183,10 @@ void MyVector<T>::resize() {
     T* new_data = (T*)malloc(sizeof(T) * new_capacity);
 
     if (new_data) {
-        // Copy elements to new location
+        // Move-construct elements to new location
         for (unsigned long i = 0; i < size; i++) {
-            new_data[i] = data[i];
+            new (&new_data[i]) T(data[i]); // Copy construct
+            data[i].~T(); // Destroy old object
         }
 
         if (data) free(data);
@@ -209,13 +218,13 @@ const T& MyVector<T>::operator[](unsigned long index) const {
 template<typename T>
 void MyVector<T>::sort() {
     // Simple bubble sort (for educational purposes)
-    for (unsigned long i = 0; i < size - 1; i++) {
+    for (unsigned long i = 0; i < size && size > 0; i++) {
         for (unsigned long j = 0; j < size - i - 1; j++) {
-            if (data[j+1] < data[j]) {
-                // Swap elements
+            if (data[j + 1] < data[j]) {
+                // Swap elements using temporary
                 T temp = data[j];
-                data[j] = data[j+1];
-                data[j+1] = temp;
+                data[j] = data[j + 1];
+                data[j + 1] = temp;
             }
         }
     }

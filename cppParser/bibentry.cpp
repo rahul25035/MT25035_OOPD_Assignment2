@@ -1,6 +1,8 @@
-// bibentry.cpp - Bibliography entry class implementation
+// bibentry.cpp - Bibliography entry class implementation (FIXED VERSION)
 #include "bibentry.h"
 #include "Author.h"
+#include "placement_new.h"
+
 
 // Constructors
 BibEntry::BibEntry() : author_count(0) {
@@ -45,16 +47,22 @@ void BibEntry::initialize() {
     address.clear();
     author_count = 0;
 
-    // Allocate authors array
+    // Allocate authors array using malloc for consistency
     if (!authors) {
-        authors = new Author[MAX_AUTHORS];  // plain array
-        author_count = 0;
-}
+        authors = (Author*)malloc(sizeof(Author) * MAX_AUTHORS);
+        if (authors) {
+            // Initialize each Author object using placement new
+            for (int i = 0; i < MAX_AUTHORS; i++) {
+                new (&authors[i]) Author();
+            }
+        }
+    }
 }
 
-// Assignment operator
+// Assignment operator - FIXED
 BibEntry& BibEntry::operator=(const BibEntry& other) {
     if (this != &other) {
+        // Copy simple fields
         entry_type = other.entry_type;
         entry_key = other.entry_key;
         title = other.title;
@@ -73,13 +81,23 @@ BibEntry& BibEntry::operator=(const BibEntry& other) {
         publisher = other.publisher;
         address = other.address;
 
-        // Clear existing authors
-        clear_authors();
+        // Clear existing authors first
+        author_count = 0;
+
+        // Ensure we have authors array allocated
+        if (!authors) {
+            authors = (Author*)malloc(sizeof(Author) * MAX_AUTHORS);
+            if (authors) {
+                for (int i = 0; i < MAX_AUTHORS; i++) {
+                    new (&authors[i]) Author();
+                }
+            }
+        }
 
         // Copy authors
-        author_count = other.author_count;
-        if (author_count > 0 && authors) {
-            for (int i = 0; i < author_count; i++) {
+        if (authors && other.authors) {
+            author_count = other.author_count;
+            for (int i = 0; i < author_count && i < MAX_AUTHORS; i++) {
                 authors[i] = other.authors[i];
             }
         }
@@ -87,7 +105,7 @@ BibEntry& BibEntry::operator=(const BibEntry& other) {
     return *this;
 }
 
-// Comparison operators for sorting by <year descending, title alphabetical>
+// Comparison operators for sorting by <year descending, title ascending>
 bool BibEntry::operator<(const BibEntry& other) const {
     int this_year = get_year_as_int();
     int other_year = other.get_year_as_int();
@@ -168,7 +186,7 @@ void BibEntry::set_ppt_url(const MyString& url) {
     }
 }
 
-// Author management
+// Author management - FIXED
 void BibEntry::add_author(const Author& author) {
     if (author_count < MAX_AUTHORS && authors) {
         authors[author_count] = author;
@@ -178,10 +196,14 @@ void BibEntry::add_author(const Author& author) {
 
 void BibEntry::clear_authors() {
     if (authors) {
-        delete[] authors;
-        authors = nullptr;
+        // Call destructors for each Author object
+        for (int i = 0; i < MAX_AUTHORS; i++) {
+            authors[i].~Author();
         }
-
+        // Free the memory using free() since we allocated with malloc()
+        free(authors);
+        authors = nullptr;
+    }
     author_count = 0;
 }
 
@@ -292,23 +314,28 @@ void BibEntry::set_field(const MyString& field_name, const MyString& field_value
     if (field_name == "title") {
         title = field_value;
     } else if (field_name == "author") {
-    // Parse authors
-    Author temp_authors[MAX_AUTHORS];
-    int temp_count;
-    if (Author::parse_author_field(field_value, temp_authors, MAX_AUTHORS, temp_count)) {
-        clear_authors();
-        // DO NOT call initialize() here - it wipes out all other fields!
-        // Just reallocate the authors array
-        if (!authors) {
-            authors = new Author[MAX_AUTHORS];
+        // Parse authors
+        Author temp_authors[MAX_AUTHORS];
+        int temp_count;
+        if (Author::parse_author_field(field_value, temp_authors, MAX_AUTHORS, temp_count)) {
+            // Reset author count but don't reallocate array
+            author_count = 0;
+            
+            // Ensure we have authors array allocated
+            if (!authors) {
+                authors = (Author*)malloc(sizeof(Author) * MAX_AUTHORS);
+                if (authors) {
+                    for (int i = 0; i < MAX_AUTHORS; i++) {
+                        new (&authors[i]) Author();
+                    }
+                }
+            }
+            
+            // Add parsed authors
+            for (int i = 0; i < temp_count && i < MAX_AUTHORS; i++) {
+                add_author(temp_authors[i]);
+            }
         }
-        author_count = 0;
-        for (int i = 0; i < temp_count; i++) {
-            add_author(temp_authors[i]);
-        }
-    
-}
-
     } else if (field_name == "year") {
         set_year(field_value);
     } else if (field_name == "booktitle") {
@@ -387,61 +414,61 @@ MyString BibEntry::to_string() const {
     result += ",\n";
 
     if (!title.empty()) {
-        result += "    title = {";
+        result += "  title = {";
         result += title;
         result += "},\n";
     }
 
     if (author_count > 0) {
-        result += "    author = {";
+        result += "  author = {";
         result += get_formatted_authors();
         result += "},\n";
     }
 
     if (!year.empty()) {
-        result += "    year = {";
+        result += "  year = {";
         result += year;
         result += "},\n";
     }
 
     if (!booktitle.empty()) {
-        result += "    booktitle = {";
+        result += "  booktitle = {";
         result += booktitle;
         result += "},\n";
     }
 
     if (!journal.empty()) {
-        result += "    journal = {";
+        result += "  journal = {";
         result += journal;
         result += "},\n";
     }
 
     if (!doi.empty()) {
-        result += "    doi = {";
+        result += "  doi = {";
         result += doi;
         result += "},\n";
     }
 
     if (!pdf_url.empty()) {
-        result += "    pdf = {";
+        result += "  pdf = {";
         result += pdf_url;
         result += "},\n";
     }
 
     if (!code_url.empty()) {
-        result += "    code = {";
+        result += "  code = {";
         result += code_url;
         result += "},\n";
     }
 
     if (!ppt_url.empty()) {
-        result += "    ppt = {";
+        result += "  ppt = {";
         result += ppt_url;
         result += "},\n";
     }
 
     if (!abstract.empty()) {
-        result += "    abstract = {";
+        result += "  abstract = {";
         // Truncate abstract for display
         if (abstract.length() > 100) {
             result += abstract.substr(0, 100);
