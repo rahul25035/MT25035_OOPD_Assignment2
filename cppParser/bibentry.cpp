@@ -292,16 +292,23 @@ void BibEntry::set_field(const MyString& field_name, const MyString& field_value
     if (field_name == "title") {
         title = field_value;
     } else if (field_name == "author") {
-        // Parse authors
-        Author temp_authors[MAX_AUTHORS];
-        int temp_count;
-        if (Author::parse_author_field(field_value, temp_authors, MAX_AUTHORS, temp_count)) {
-            clear_authors();
-            initialize(); // Reallocate authors array
-            for (int i = 0; i < temp_count; i++) {
-                add_author(temp_authors[i]);
-            }
+    // Parse authors
+    Author temp_authors[MAX_AUTHORS];
+    int temp_count;
+    if (Author::parse_author_field(field_value, temp_authors, MAX_AUTHORS, temp_count)) {
+        clear_authors();
+        // DO NOT call initialize() here - it wipes out all other fields!
+        // Just reallocate the authors array
+        if (!authors) {
+            authors = new Author[MAX_AUTHORS];
         }
+        author_count = 0;
+        for (int i = 0; i < temp_count; i++) {
+            add_author(temp_authors[i]);
+        }
+    
+}
+
     } else if (field_name == "year") {
         set_year(field_value);
     } else if (field_name == "booktitle") {

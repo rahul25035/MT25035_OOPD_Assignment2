@@ -172,8 +172,6 @@ bool BibDatabase::parse_bib_entry(int fd, MyString& current_line) {
 
     // Read and parse fields until we find the closing brace
     char line_buffer[MAX_LINE_LENGTH];
-    bool in_field_value = false;
-    char field_delimiter = '\0';  // Track if we're in quotes or braces
 
     while (read_line(fd, line_buffer, MAX_LINE_LENGTH)) {
         MyString line(line_buffer);
@@ -185,22 +183,17 @@ bool BibDatabase::parse_bib_entry(int fd, MyString& current_line) {
             continue;
         }
 
-        // Check if this is just a closing brace at root level
-        if (!in_field_value && trimmed_line == "}") {
+        // Check if this is just a closing brace - end of entry
+        if (trimmed_line == "}") {
             break;
         }
 
-        // Handle field parsing - only parse fields when not inside field values
-        if (!in_field_value) {
-            // Check if line contains field assignment
-            if (trimmed_line.find("=") != trimmed_line.length()) {
-                // This is a field line, parse it
-                entry.parse_field_line(line);
-            }
+        // Check if line contains field assignment (has '=' sign)
+        if (trimmed_line.find("=") != trimmed_line.length()) {
+            // This is a field line, parse it
+            printf("Parsing field line: %s\n", trimmed_line.c_str());  // Debug output
+            entry.parse_field_line(line);
         }
-
-        // Track if we're inside a field value (between braces or quotes)
-        // This is a simplified version - you'll need more robust parsing
     }
 
     // Add the entry if it's valid
@@ -209,7 +202,10 @@ bool BibDatabase::parse_bib_entry(int fd, MyString& current_line) {
         printf("Added entry: %s\n", entry.get_entry_key().c_str());
         return true;
     } else {
-        printf("Warning: Invalid entry skipped\n");
+        printf("Warning: Invalid entry skipped - Key: '%s', Title: '%s', Year: '%s'\n", 
+               entry.get_entry_key().c_str(), 
+               entry.get_title().c_str(), 
+               entry.get_year().c_str());
         return false;
     }
 }
