@@ -42,7 +42,7 @@ private:
     MyString database_name;
 
     // File I/O helper methods
-    static const int MAX_LINE_LENGTH = 1024;
+    static const int MAX_LINE_LENGTH = 8192;
     bool read_line(int fd, char* buffer, int max_len);
     bool is_whitespace_line(const MyString& line);
 
