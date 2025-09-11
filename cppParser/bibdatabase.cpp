@@ -221,7 +221,7 @@ void BibDatabase::add_entry(const BibEntry& entry) {
 }
 
 bool BibDatabase::remove_entry(const MyString& entry_key) {
-    // Simple removal - in a real implementation, this could be more efficient
+    // Simple removal - create new vector without the entry
     MyVector<BibEntry> new_entries;
     bool found = false;
 
@@ -302,46 +302,6 @@ int BibDatabase::count_institute_authors(const MyString& institute_name) const {
     }
 
     return total_count;
-}
-
-MyVector<BibEntry*> BibDatabase::find_entries_by_year(const MyString& year) {
-    MyVector<BibEntry*> result;
-
-    for (unsigned long i = 0; i < entries.get_size(); i++) {
-        if (entries[i].get_year() == year) {
-            result.push_back(&entries[i]);
-        }
-    }
-
-    return result;
-}
-
-MyVector<BibEntry*> BibDatabase::find_entries_by_author(const MyString& author_name) {
-    MyVector<BibEntry*> result;
-
-    for (unsigned long i = 0; i < entries.get_size(); i++) {
-        for (int j = 0; j < entries[i].get_author_count(); j++) {
-            if (entries[i].get_author(j).get_name().find(author_name) != 
-                entries[i].get_author(j).get_name().length()) {
-                result.push_back(&entries[i]);
-                break; // Don't add the same entry multiple times
-            }
-        }
-    }
-
-    return result;
-}
-
-MyVector<BibEntry*> BibDatabase::find_entries_by_institute(const MyString& institute_name) {
-    MyVector<BibEntry*> result;
-
-    for (unsigned long i = 0; i < entries.get_size(); i++) {
-        if (entries[i].count_institute_authors(institute_name) > 0) {
-            result.push_back(&entries[i]);
-        }
-    }
-
-    return result;
 }
 
 // Accessors

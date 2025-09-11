@@ -1,23 +1,27 @@
 // bibentry.cpp - Bibliography entry class implementation
 #include "bibentry.h"
+#include "author.h"
 
 // Constructors
 BibEntry::BibEntry() : author_count(0) {
+    authors = nullptr;
     initialize();
 }
 
 BibEntry::BibEntry(const MyString& key) : entry_key(key), author_count(0) {
+    authors = nullptr;
     initialize();
 }
 
 BibEntry::BibEntry(const BibEntry& other) : author_count(0) {
+    authors = nullptr;
     initialize();
     *this = other;
 }
 
 // Destructor
 BibEntry::~BibEntry() {
-    // MyString destructors handle cleanup automatically
+    clear_authors();
 }
 
 // Private helper methods
@@ -41,9 +45,14 @@ void BibEntry::initialize() {
     address.clear();
     author_count = 0;
 
-    // Clear authors array
-    for (int i = 0; i < MAX_AUTHORS; i++) {
-        authors[i].clear();
+    // Allocate authors array
+    if (!authors) {
+        authors = (Author*)malloc(sizeof(Author) * MAX_AUTHORS);
+        if (authors) {
+            for (int i = 0; i < MAX_AUTHORS; i++) {
+                new(authors + i) Author();
+            }
+        }
     }
 }
 
@@ -68,14 +77,15 @@ BibEntry& BibEntry::operator=(const BibEntry& other) {
         publisher = other.publisher;
         address = other.address;
 
-        author_count = other.author_count;
-        for (int i = 0; i < author_count; i++) {
-            authors[i] = other.authors[i];
-        }
+        // Clear existing authors
+        clear_authors();
 
-        // Clear remaining authors
-        for (int i = author_count; i < MAX_AUTHORS; i++) {
-            authors[i].clear();
+        // Copy authors
+        author_count = other.author_count;
+        if (author_count > 0 && authors) {
+            for (int i = 0; i < author_count; i++) {
+                authors[i] = other.authors[i];
+            }
         }
     }
     return *this;
@@ -123,7 +133,7 @@ int BibEntry::get_author_count() const { return author_count; }
 
 const Author& BibEntry::get_author(int index) const {
     static Author empty_author; // Return empty author for invalid index
-    if (index >= 0 && index < author_count) {
+    if (index >= 0 && index < author_count && authors) {
         return authors[index];
     }
     return empty_author;
@@ -164,24 +174,31 @@ void BibEntry::set_ppt_url(const MyString& url) {
 
 // Author management
 void BibEntry::add_author(const Author& author) {
-    if (author_count < MAX_AUTHORS) {
+    if (author_count < MAX_AUTHORS && authors) {
         authors[author_count] = author;
         author_count++;
     }
 }
 
 void BibEntry::clear_authors() {
-    for (int i = 0; i < author_count; i++) {
-        authors[i].clear();
+    if (authors) {
+        // Call destructors
+        for (int i = 0; i < MAX_AUTHORS; i++) {
+            authors[i].~Author();
+        }
+        free(authors);
+        authors = nullptr;
     }
     author_count = 0;
 }
 
 int BibEntry::count_institute_authors(const MyString& institute_name) const {
     int count = 0;
-    for (int i = 0; i < author_count; i++) {
-        if (authors[i].is_from_institute(institute_name)) {
-            count++;
+    if (authors) {
+        for (int i = 0; i < author_count; i++) {
+            if (authors[i].is_from_institute(institute_name)) {
+                count++;
+            }
         }
     }
     return count;
@@ -287,6 +304,7 @@ void BibEntry::set_field(const MyString& field_name, const MyString& field_value
         int temp_count;
         if (Author::parse_author_field(field_value, temp_authors, MAX_AUTHORS, temp_count)) {
             clear_authors();
+            initialize(); // Reallocate authors array
             for (int i = 0; i < temp_count; i++) {
                 add_author(temp_authors[i]);
             }
@@ -320,7 +338,6 @@ void BibEntry::set_field(const MyString& field_name, const MyString& field_value
     } else if (field_name == "address") {
         address = field_value;
     }
-    // Add more fields as needed
 }
 
 // Validation methods
@@ -338,7 +355,10 @@ bool BibEntry::validate_year(const MyString& year_str) const {
     }
 
     // Check reasonable range (1900-2100)
-    int year_val = get_year_as_int();
+    int year_val = 0;
+    for (unsigned long i = 0; i < year_str.length(); i++) {
+        year_val = year_val * 10 + (year_str[i] - '0');
+    }
     return year_val >= 1900 && year_val <= 2100;
 }
 
@@ -437,7 +457,7 @@ MyString BibEntry::to_string() const {
 }
 
 MyString BibEntry::get_formatted_authors() const {
-    if (author_count == 0) return MyString();
+    if (author_count == 0 || !authors) return MyString();
 
     MyString result = authors[0].get_name();
 
@@ -454,6 +474,7 @@ bool BibEntry::empty() const {
 }
 
 void BibEntry::clear() {
+    clear_authors();
     initialize();
 }
 

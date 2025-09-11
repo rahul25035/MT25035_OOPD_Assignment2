@@ -3,7 +3,9 @@
 #define BIBENTRY_H
 
 #include "mystring.h"
-#include "author.h"
+
+// Forward declaration to avoid circular includes
+class Author;
 
 class BibEntry {
 private:
@@ -23,7 +25,7 @@ private:
 
     // Authors array
     static const int MAX_AUTHORS = 100;
-    Author authors[MAX_AUTHORS];
+    Author* authors;  // Will be allocated dynamically
     int author_count;
 
     // Additional fields

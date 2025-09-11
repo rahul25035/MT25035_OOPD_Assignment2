@@ -1,5 +1,6 @@
 // main.cpp - Main program implementation
 #include "bibdatabase.h"
+#include "author.h"
 
 extern "C" {
     int printf(const char* format, ...);

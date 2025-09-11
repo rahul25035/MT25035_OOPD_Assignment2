@@ -4,8 +4,9 @@
 
 #include "bibentry.h"
 #include "mystring.h"
+#include "author.h"
 
-// Custom vector-like container since we can't use std::vector
+// Simple vector-like container since we can't use std::vector
 template<typename T>
 class MyVector {
 private:
@@ -82,9 +83,6 @@ public:
 
     // Search and filter operations
     int count_institute_authors(const MyString& institute_name) const;
-    MyVector<BibEntry*> find_entries_by_year(const MyString& year);
-    MyVector<BibEntry*> find_entries_by_author(const MyString& author_name);
-    MyVector<BibEntry*> find_entries_by_institute(const MyString& institute_name);
 
     // Accessors
     const MyString& get_name() const;
@@ -103,13 +101,23 @@ public:
     bool validate() const;
 };
 
-// Template implementation (must be in header since we're not using separate compilation for templates)
+// Template implementation (simplified without placement new)
 template<typename T>
 MyVector<T>::MyVector() : data(nullptr), size(0), capacity(0) {}
 
 template<typename T>
 MyVector<T>::MyVector(const MyVector<T>& other) : data(nullptr), size(0), capacity(0) {
-    *this = other;
+    if (other.size > 0) {
+        capacity = other.size;
+        data = (T*)malloc(sizeof(T) * capacity);
+        if (data) {
+            for (unsigned long i = 0; i < other.size; i++) {
+                // Use copy constructor manually
+                data[i] = other.data[i];
+            }
+            size = other.size;
+        }
+    }
 }
 
 template<typename T>
@@ -120,15 +128,13 @@ MyVector<T>::~MyVector() {
 template<typename T>
 MyVector<T>& MyVector<T>::operator=(const MyVector<T>& other) {
     if (this != &other) {
-        clear();
+        deallocate();
         if (other.size > 0) {
-            // Allocate space
             capacity = other.size;
             data = (T*)malloc(sizeof(T) * capacity);
             if (data) {
-                // Copy construct elements
                 for (unsigned long i = 0; i < other.size; i++) {
-                    new(data + i) T(other.data[i]);
+                    data[i] = other.data[i];
                 }
                 size = other.size;
             }
@@ -143,19 +149,13 @@ void MyVector<T>::push_back(const T& item) {
         resize();
     }
     if (data && size < capacity) {
-        new(data + size) T(item);
+        data[size] = item;
         size++;
     }
 }
 
 template<typename T>
 void MyVector<T>::clear() {
-    if (data) {
-        // Destroy elements
-        for (unsigned long i = 0; i < size; i++) {
-            data[i].~T();
-        }
-    }
     deallocate();
 }
 
@@ -175,10 +175,9 @@ void MyVector<T>::resize() {
     T* new_data = (T*)malloc(sizeof(T) * new_capacity);
 
     if (new_data) {
-        // Move elements to new location
+        // Copy elements to new location
         for (unsigned long i = 0; i < size; i++) {
-            new(new_data + i) T(data[i]);
-            data[i].~T();
+            new_data[i] = data[i];
         }
 
         if (data) free(data);
