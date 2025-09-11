@@ -172,9 +172,10 @@ bool BibDatabase::parse_bib_entry(int fd, MyString& current_line) {
 
     // Read and parse fields until we find the closing brace
     char line_buffer[MAX_LINE_LENGTH];
-    int brace_level = 1; // We've seen one opening brace
+    bool in_field_value = false;
+    char field_delimiter = '\0';  // Track if we're in quotes or braces
 
-    while (brace_level > 0 && read_line(fd, line_buffer, MAX_LINE_LENGTH)) {
+    while (read_line(fd, line_buffer, MAX_LINE_LENGTH)) {
         MyString line(line_buffer);
         MyString trimmed_line = line;
         trimmed_line.trim();
@@ -184,24 +185,22 @@ bool BibDatabase::parse_bib_entry(int fd, MyString& current_line) {
             continue;
         }
 
-        // Count braces to handle nested structures
-        for (unsigned long i = 0; i < trimmed_line.length(); i++) {
-            if (trimmed_line[i] == '{') {
-                brace_level++;
-            } else if (trimmed_line[i] == '}') {
-                brace_level--;
-            }
-        }
-
-        // If this is just a closing brace, we're done
-        if (trimmed_line == "}") {
+        // Check if this is just a closing brace at root level
+        if (!in_field_value && trimmed_line == "}") {
             break;
         }
 
-        // Try to parse this as a field line
-        if (brace_level == 1) { // Only parse fields at the top level
-            entry.parse_field_line(line);
+        // Handle field parsing - only parse fields when not inside field values
+        if (!in_field_value) {
+            // Check if line contains field assignment
+            if (trimmed_line.find("=") != trimmed_line.length()) {
+                // This is a field line, parse it
+                entry.parse_field_line(line);
+            }
         }
+
+        // Track if we're inside a field value (between braces or quotes)
+        // This is a simplified version - you'll need more robust parsing
     }
 
     // Add the entry if it's valid
@@ -214,6 +213,7 @@ bool BibDatabase::parse_bib_entry(int fd, MyString& current_line) {
         return false;
     }
 }
+
 
 // Entry management
 void BibDatabase::add_entry(const BibEntry& entry) {
