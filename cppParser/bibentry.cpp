@@ -47,13 +47,9 @@ void BibEntry::initialize() {
 
     // Allocate authors array
     if (!authors) {
-        authors = (Author*)malloc(sizeof(Author) * MAX_AUTHORS);
-        if (authors) {
-            for (int i = 0; i < MAX_AUTHORS; i++) {
-                new(authors + i) Author();
-            }
-        }
-    }
+        authors = new Author[MAX_AUTHORS];  // plain array
+        author_count = 0;
+}
 }
 
 // Assignment operator
@@ -182,13 +178,10 @@ void BibEntry::add_author(const Author& author) {
 
 void BibEntry::clear_authors() {
     if (authors) {
-        // Call destructors
-        for (int i = 0; i < MAX_AUTHORS; i++) {
-            authors[i].~Author();
-        }
-        free(authors);
+        delete[] authors;
         authors = nullptr;
-    }
+        }
+
     author_count = 0;
 }
 
