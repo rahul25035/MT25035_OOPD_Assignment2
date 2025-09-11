@@ -1,223 +1,191 @@
-# BibTeX Parser - NO STANDARD LIBRARIES VERSION
+# BibTeX Parser - C++ OOP Implementation
 
-## Object-Oriented Programming and Design - Assignment 2
-### Monsoon 2025
+## Assignment Information
 
-This project is a complete C++ implementation of a BibTeX parser built **entirely from scratch** without using ANY standard libraries. It demonstrates advanced OOP principles while using only direct system calls for all functionality.
+**Course:** Object-Oriented Programming and Design  
+**Assignment:** Assignment 2 - Concepts of Object-Oriented Programming  
+**Session:** Monsoon 2025  
+**Instructor:** Arani Bhattacharya  
 
-## 🚫 ZERO LIBRARIES USED
+## Project Overview
 
-This implementation uses:
-- ❌ NO stdio.h (no printf, scanf, fopen, etc.)
-- ❌ NO stdlib.h (no malloc, free, atoi, etc.)
-- ❌ NO string.h (no strlen, strcmp, strcpy, etc.)
-- ❌ NO iostream (no cout, cin, etc.)
-- ❌ NO std::string, std::vector, or any STL
-- ❌ NO ctype.h (no isspace, tolower, etc.)
+This project is a complete C++ implementation of a BibTeX parser that converts the provided C code while strictly adhering to Object-Oriented Programming principles. The implementation is built **without using any standard C/C++ libraries** as per assignment requirements.
 
-## ✅ WHAT WE BUILT FROM SCRATCH
+## Key Features
 
-Instead, everything is implemented using:
-- **Direct system calls** (read, write, open, close, brk)
-- **Inline assembly** for system call interface
-- **Custom memory management** using brk system call
-- **Manual string operations** (length, comparison, concatenation)
-- **Custom I/O functions** (print, read line)
-- **Pure OOP design** with proper encapsulation
+### 1. Object-Oriented Design
+- **Data Abstraction**: Custom classes encapsulate data and behavior
+- **Data Hiding**: Private members with controlled public interfaces
+- **Encapsulation**: Related data and methods grouped together
+- **No global variables**: All functionality within appropriate classes
 
-## 📁 FILE STRUCTURE
+### 2. Custom Implementation (No Standard Libraries)
+- **MyString**: Complete string class replacing `std::string`
+- **MyVector**: Dynamic array template replacing `std::vector`
+- **Custom memory management**: Manual `malloc`/`free` operations
+- **Custom file I/O**: Direct system calls for file operations
+- **Custom string functions**: `strlen`, `strcpy`, `strcmp`, etc.
 
-### Core System Interface
-- **SystemInterface.h** - Direct system call interface using inline assembly
+### 3. Core Classes
 
-### OOP Classes (Following Assignment Requirements)
-- **String.h** - Custom string class with dynamic memory management
-- **Author.h** - Author information with institute checking
-- **Publication.h** - Publication data with URL fields and sorting
-- **Bibliography.h** - Collection management with + operator and file parsing
+#### MyString Class (`mystring.h`, `mystring.cpp`)
+- Dynamic memory management
+- Operator overloading (`+`, `+=`, `==`, `<`, etc.)
+- String manipulation methods (find, substr, trim, etc.)
+- No fixed-length limitations
 
-### Main Program
-- **main.cpp** - Main program following original C logic exactly
-- **Makefile** - Build system with comprehensive testing
-- **README.md** - This documentation
+#### Author Class (`author.h`, `author.cpp`)
+- Represents individual authors with name and affiliation
+- Institute affiliation checking
+- Parsing of author fields from BibTeX
 
-## 🎯 ASSIGNMENT COMPLIANCE
+#### BibEntry Class (`bibentry.h`, `bibentry.cpp`)
+- Represents a single bibliography entry
+- All standard BibTeX fields supported
+- **Additional URL fields**: PDF, source code, presentation URLs
+- Sorting support with `<` operator (year descending, title ascending)
+- Input validation for years, DOIs, and URLs
 
-### ✅ Core Requirements Met:
-1. **Converted C to C++** - Full OOP implementation following original logic
-2. **Added URL fields** - PDF, source code, and presentation URLs
-3. **Removed fixed strings** - Dynamic String class, no char arrays
-4. **Implemented < operator** - Year descending, title lexicographic ascending
-5. **Implemented + operator** - Bibliography combination functionality
-6. **At least 3 class files** - 4 classes: String, Author, Publication, Bibliography
-7. **Constructors/Destructors** - Proper memory management throughout
-8. **NO standard libraries** - Taken to the extreme - zero libraries used
-9. **Data abstraction** - Private members, public interfaces
-10. **Error checking** - Input validation and bounds checking
-11. **Operator overloading** - Comparison, assignment, arithmetic operators
+#### BibDatabase Class (`bibdatabase.h`, `bibdatabase.cpp`)
+- Container for multiple BibEntry objects
+- **Operator overloading**: `+` and `+=` for database merging
+- File parsing and saving capabilities
+- Searching and filtering operations
 
-### 🔥 Beyond Requirements:
-- **System-level programming** - Direct OS interface
-- **Custom memory allocator** - Using brk system call
-- **Assembly integration** - Inline assembly for system calls
-- **Advanced OOP** - Multiple inheritance-ready design
+### 4. Assignment Requirements Fulfilled
 
-## 🛠️ BUILDING AND RUNNING
+✅ **Convert C to C++**: Complete rewrite using OOP principles  
+✅ **OOP Principles**: Data abstraction, hiding, and encapsulation implemented  
+✅ **URL Fields**: PDF, code, and presentation URLs added and retained  
+✅ **No Fixed Strings**: Dynamic MyString class replaces C-style strings  
+✅ **Sorting Operator**: `<` operator for `<year descending, title ascending>` sorting  
+✅ **Merging Operator**: `+` operator for combining bibliography databases  
+✅ **Constructors/Destructors**: Proper memory management implemented  
+✅ **Input Validation**: Year, DOI, URL, and other field validation  
+✅ **Operator Overloading**: Multiple operators implemented as required  
+✅ **No Standard Libraries**: Complete custom implementation  
+✅ **Multiple Files**: 4 classes across 8+ files (headers and implementations)  
+
+## File Structure
+
+```
+bib-parser/
+├── mystring.h          # Custom string class header
+├── mystring.cpp        # Custom string class implementation  
+├── author.h            # Author class header
+├── author.cpp          # Author class implementation
+├── bibentry.h          # Bibliography entry class header  
+├── bibentry.cpp        # Bibliography entry class implementation
+├── bibdatabase.h       # Database container class header
+├── bibdatabase.cpp     # Database container class implementation
+├── main.cpp            # Main program with demonstrations
+├── Makefile            # Build configuration
+├── README.md           # This documentation file
+└── ref.bib_doi.bib     # Sample BibTeX file for testing
+```
+
+## Building and Running
 
 ### Prerequisites
-- Linux x86_64 system (uses Linux system calls)
-- g++ compiler with C++11 support
+- Linux environment with GCC/G++ compiler
 - Make utility
+- No additional libraries required
 
-### Build Commands
+### Building
 ```bash
-# Build the program
+# Build the project
 make
 
-# Create sample test files
-make sample_files
+# Clean build files
+make clean
 
-# Run with MIT institute
-./bib_parser sample.bib "MIT"
+# Build with debug symbols
+make debug
 
-# Run with Stanford institute  
-./bib_parser sample.bib "Stanford"
+# Run tests
+make test
 
-# Verify no libraries used
-make check_libs
-
-# Show assignment compliance
-make compliance
+# Show help
+make help
 ```
 
-### Usage
+### Running the Program
 ```bash
-./bib_parser <bib_file> <institute_name>
+# Basic usage
+./bib-parser <bib_file> <institute_name>
 
-Examples:
-./bib_parser papers.bib "MIT"
-./bib_parser papers.bib "University of California"
+# Example with provided test file
+./bib-parser ref.bib_doi.bib "IIITD"
+
+# Example with other institutes
+./bib-parser ref.bib_doi.bib "MIT"
+./bib-parser ref.bib_doi.bib "University of California"
 ```
 
-## 📊 ORIGINAL C LOGIC PRESERVATION
+### Expected Output
+The program will:
+1. Parse the BibTeX file and load entries
+2. Display parsing progress and summary
+3. Count and display authors from the specified institute
+4. Demonstrate sorting by year (descending) and title (ascending)
+5. Demonstrate database merging using `+` operator
+6. Show validation and error handling
 
-The implementation follows the original C code logic exactly:
+## Technical Implementation Details
 
-### BibTeX Parsing:
-- Same entry detection (`@` character)
-- Same field extraction (title, year, author, journal)
-- Same author splitting (" and " delimiter)
-- Same institute checking (substring search in author names)
-- Same output formatting and statistics
+### Memory Management
+- Custom memory allocation using `malloc`/`free`
+- RAII principles with constructors/destructors
+- No memory leaks (all allocated memory is properly freed)
 
-### Enhanced Features:
-- **URL field support** - PDF, source code, presentation URLs
-- **Dynamic memory** - No fixed-size arrays
-- **Proper sorting** - Year descending, title ascending
-- **Bibliography merging** - + operator functionality
-- **OOP design** - Encapsulation and data hiding
+### Error Handling
+- Input validation for all user inputs
+- File operation error checking
+- Graceful handling of malformed BibTeX entries
+- Comprehensive error messages
 
-## 🧪 TESTING
+### Performance Considerations
+- Dynamic memory allocation only when needed
+- Efficient string operations
+- Simple but effective sorting algorithm (bubble sort for educational purposes)
 
-### Sample Data
-The Makefile creates comprehensive test files:
-- **sample.bib** - Multiple publications with various institutes
-- **sample2.bib** - Additional data for testing + operator
+### Compliance with Assignment Requirements
+- **No standard libraries**: Only system calls used
+- **OOP principles**: Proper encapsulation, abstraction, and data hiding
+- **Operator overloading**: `<`, `+`, `+=`, `==`, `!=` operators implemented
+- **Input validation**: Years, DOIs, URLs validated
+- **Multiple classes**: 4 distinct classes with clear responsibilities
 
-### Test Cases
-```bash
-# Basic institute searching
-make test_mit      # Find MIT authors
-make test_stanford # Find Stanford authors
+## Testing
 
-# Interactive features
-./bib_parser sample.bib "MIT"
-# Choose 'y' for OOP demonstration to see:
-# - Sorting functionality
-# - + operator
-# - URL field display
-```
+The program has been tested with:
+- The provided `ref.bib_doi.bib` file
+- Various institute names and search patterns
+- Edge cases (empty files, malformed entries, etc.)
+- Memory leak testing (valgrind compatible)
+- Large BibTeX files for performance testing
 
-## 🔧 TECHNICAL IMPLEMENTATION
+## Limitations and Future Improvements
 
-### System Calls Used:
-- **SYS_read (0)** - File and keyboard input
-- **SYS_write (1)** - Console output
-- **SYS_open (2)** - File opening
-- **SYS_close (3)** - File closing
-- **SYS_brk (12)** - Memory allocation
-- **SYS_exit (60)** - Program termination
+### Current Limitations
+- Simple sorting algorithm (O(n²) bubble sort)
+- Basic pattern matching for institute affiliation
+- Limited BibTeX format variations supported
 
-### Memory Management:
-- **Custom allocator** using brk system call
-- **Placement new** for object construction
-- **No free()** - simplified allocator model
-- **Automatic cleanup** through destructors
+### Potential Improvements
+- More efficient sorting algorithms (quicksort, mergesort)
+- Advanced pattern matching for institute names
+- Support for more BibTeX entry types and fields
+- Better error recovery for malformed entries
 
-### String Operations:
-All implemented manually:
-- Length calculation
-- Comparison (lexicographic)
-- Concatenation
-- Substring extraction
-- Trimming whitespace
-- Case conversion
-- Search functionality
+## Author Information
 
-## 🎓 EDUCATIONAL VALUE
+This implementation demonstrates advanced C++ programming concepts including:
+- Custom container and string classes
+- Template programming (MyVector)
+- Operator overloading
+- Memory management
+- File I/O without standard libraries
+- Object-oriented design patterns
 
-This implementation demonstrates:
-- **Systems Programming** - Direct OS interface
-- **Advanced OOP** - Proper encapsulation and abstraction
-- **Memory Management** - Custom allocation strategies
-- **Algorithm Implementation** - Sorting, parsing, searching
-- **Assembly Integration** - System call interface
-- **Error Handling** - Robust input validation
-
-## 🐛 TROUBLESHOOTING
-
-### Build Issues:
-```bash
-# If compilation fails
-make compile_test  # Test compilation only
-make check_libs    # Verify no forbidden includes
-```
-
-### Runtime Issues:
-- Ensure Linux x86_64 system (uses Linux syscalls)
-- Check file permissions for BibTeX files
-- Verify input files are in valid BibTeX format
-
-### Memory Issues:
-- Program uses brk() for memory allocation
-- Large files may require system memory limits adjustment
-- No memory leaks as allocator doesn't free individual blocks
-
-## 📈 PERFORMANCE CHARACTERISTICS
-
-- **Memory**: O(n) where n is total content size
-- **Parsing**: O(n) linear scan of file
-- **Sorting**: O(n log n) quicksort implementation
-- **Search**: O(n*m) substring search where m is institute name length
-
-## 🚀 ADVANCED FEATURES
-
-### Demonstrated OOP Concepts:
-- **Encapsulation** - Private data members
-- **Data Hiding** - Public interfaces only
-- **Abstraction** - High-level operations on complex data
-- **Operator Overloading** - Natural syntax for operations
-- **Resource Management** - RAII principles
-- **Composition** - Classes containing other classes
-
-### System Integration:
-- **No Library Dependencies** - Completely self-contained
-- **Direct Hardware Interface** - Via system calls
-- **Efficient I/O** - Minimal system call overhead
-- **Portable Assembly** - Standard x86_64 Linux interface
-
-## 📝 ASSIGNMENT COMPLETION
-
-This implementation represents the **ultimate interpretation** of "no libraries allowed" - it proves that sophisticated OOP programs can be built using only the most basic system primitives. Every function, every operation, every I/O action is implemented from scratch while maintaining clean, readable, and maintainable code structure.
-
-The result is a fully functional BibTeX parser that meets all assignment requirements while demonstrating advanced systems programming concepts and pure OOP design principles.
+The code is written to be educational and follows best practices for C++ development while meeting all assignment requirements.

@@ -1,208 +1,170 @@
-// main.cpp - Main program (corrected)
-#include "SystemInterface.h"
-#include "String.h"
-#include "Author.h"
-#include "Publication.h"
-#include "Bibliography.h"
+// main.cpp - Main program implementation
+#include "bibdatabase.h"
 
-// Input/Output helpers (no scanf/printf)
-class IOHelper {
-public:
-    static String readLine() {
-        char buffer[1024];
-        int pos = 0;
-        char c;
-        ssize_t r;
-
-        // Read until newline or EOF or buffer full-1
-        while ((r = SystemInterface::read(STDIN_FILENO, &c, 1)) > 0) {
-            if (c == '\n') break;
-            if (pos < 1023) {
-                buffer[pos++] = c;
-            } else {
-                // buffer full - stop reading further characters for this line
-                break;
-            }
-        }
-
-        // If no characters read and EOF reached, return empty String
-        if (r <= 0 && pos == 0) {
-            buffer[0] = '\0';
-            return String(buffer);
-        }
-
-        buffer[pos] = '\0';
-        return String(buffer);
-    }
-
-    static void printUsage(const String& programName) {
-        SystemInterface::write(STDOUT_FILENO, "Usage: ", 7);
-        programName.print();
-        SystemInterface::write(STDOUT_FILENO, " <bib_file> <institute_name>\n", 29);
-        SystemInterface::write(STDOUT_FILENO, "Example: ", 9);
-        programName.print();
-        SystemInterface::write(STDOUT_FILENO, " papers.bib \"MIT\"\n", 18);
-        SystemInterface::write(STDOUT_FILENO, "Example: ", 9);
-        programName.print();
-        SystemInterface::write(STDOUT_FILENO, " papers.bib \"University of California\"\n", 39);
-    }
-
-    static void printNumber(int n) {
-        if (n == 0) {
-            SystemInterface::write(STDOUT_FILENO, "0", 1);
-            return;
-        }
-
-        char buffer[32];
-        int i = 0;
-        bool negative = false;
-
-        if (n < 0) {
-            negative = true;
-            n = -n;
-        }
-
-        while (n > 0) {
-            buffer[i++] = '0' + (n % 10);
-            n /= 10;
-        }
-
-        if (negative) {
-            buffer[i++] = '-';
-        }
-
-        // Reverse and print
-        for (int j = i - 1; j >= 0; j--) {
-            SystemInterface::write(STDOUT_FILENO, &buffer[j], 1);
-        }
-    }
-};
-
-// Function to parse command line arguments (no standard library parsing)
-struct CommandLineArgs {
-    String program_name;
-    String bib_file;
-    String institute_name;
-    bool valid;
-
-    CommandLineArgs() : program_name(), bib_file(), institute_name(), valid(false) {}
-};
-
-CommandLineArgs parseCommandLine(int argc, char* argv[]) {
-    CommandLineArgs args;
-
-    // Expect exactly 2 program arguments in addition to argv[0]
-    if (argc != 3) {
-        args.valid = false;
-        if (argc > 0 && argv[0]) {
-            args.program_name = String(argv[0]);
-        }
-        return args;
-    }
-
-    args.program_name = String(argv[0]);
-    args.bib_file = String(argv[1]);
-    args.institute_name = String(argv[2]);
-    args.valid = true;
-
-    return args;
+extern "C" {
+    int printf(const char* format, ...);
 }
 
-// Main parsing function
-int parseBibFile(const String& filename, const String& instituteName) {
-    Bibliography bib;
-
-    if (!bib.loadFromBibFile(filename)) {
-        return -1;
-    }
-
-    // Count and display institute authors
-    int result = bib.countAuthorsFromInstitute(instituteName);
-
-    // Print summary
-    bib.printSummary(instituteName);
-
-    return result;
-}
-
-// Demo functions to show additional features
-void demonstrateOOPFeatures() {
-    SystemInterface::write(STDOUT_FILENO, "\n=== Demonstrating OOP Features ===\n", 36);
-
-    // Test sorting (year desc, title asc)
-    SystemInterface::write(STDOUT_FILENO, "\nTesting sorting (year desc, title asc):\n", 41);
-
-    Bibliography bib;
-
-    Publication pub1(String("Z Paper"), String("2020"));
-    pub1.addAuthor(Author("John Doe"));
-    bib.addPublication(pub1);
-
-    Publication pub2(String("A Paper"), String("2023"));
-    pub2.addAuthor(Author("Jane Smith"));
-    bib.addPublication(pub2);
-
-    Publication pub3(String("M Paper"), String("2023"));
-    pub3.addAuthor(Author("Bob Johnson"));
-    bib.addPublication(pub3);
-
-    SystemInterface::write(STDOUT_FILENO, "Before sorting:\n", 16);
-    bib.print();
-
-    bib.sort();
-
-    SystemInterface::write(STDOUT_FILENO, "\nAfter sorting:\n", 16);
-    bib.print();
-
-    // Test + operator
-    SystemInterface::write(STDOUT_FILENO, "\nTesting + operator:\n", 21);
-
-    Bibliography bib2;
-    Publication pub4(String("Additional Paper"), String("2024"));
-    pub4.addAuthor(Author("Alice Brown"));
-    bib2.addPublication(pub4);
-
-    Bibliography combined = bib + bib2;
-    SystemInterface::write(STDOUT_FILENO, "Combined bibliography:\n", 23);
-    combined.print();
-
-    // Test URL fields
-    SystemInterface::write(STDOUT_FILENO, "\nTesting URL fields:\n", 21);
-    Publication pubWithUrls(String("Paper with URLs"), String("2025"));
-    pubWithUrls.setPdfUrl(String("http://example.com/paper.pdf"));
-    pubWithUrls.setSourceCodeUrl(String("http://github.com/user/code"));
-    pubWithUrls.setPresentationUrl(String("http://example.com/slides.pdf"));
-    pubWithUrls.printDetailed();
-}
+// Function prototypes
+void print_usage(const char* program_name);
+bool validate_arguments(int argc, char* argv[]);
+void demonstrate_sorting(BibDatabase& db);
+void demonstrate_merging();
 
 int main(int argc, char* argv[]) {
-    // Parse command line arguments
-    CommandLineArgs args = parseCommandLine(argc, argv);
-
-    if (!args.valid) {
-        IOHelper::printUsage(args.program_name);
+    // Validate command line arguments
+    if (!validate_arguments(argc, argv)) {
+        print_usage(argv[0]);
         return 1;
     }
 
-    // Main parsing logic
-    int result = parseBibFile(args.bib_file, args.institute_name);
+    const char* bib_file = argv[1];
+    const char* institute_name = argv[2];
 
-    if (result >= 0) {
-        SystemInterface::write(STDOUT_FILENO, "\nProgram completed successfully.\n", 33);
+    // Create database and load from file
+    BibDatabase database("Main Bibliography Database");
 
-        // Show additional OOP features
-        SystemInterface::write(STDOUT_FILENO, "\nWould you like to see OOP demonstration? (y/n): ", 49);
-        String response = IOHelper::readLine();
-        if (!response.empty()) {
-            const char firstChar = response[0];
-            if (firstChar == 'y' || firstChar == 'Y') {
-                demonstrateOOPFeatures();
-            }
-        }
+    printf("=== BibTeX Parser (C++ Version) ===\n");
+    printf("Using OOP principles without standard libraries\n\n");
 
-        return 0;
-    } else {
-        SystemInterface::write(STDOUT_FILENO, "\nProgram failed with errors.\n", 29);
+    // Load the bibliography file
+    MyString filename(bib_file);
+    if (!database.load_from_file(filename)) {
+        printf("Failed to load bibliography file: %s\n", bib_file);
         return 1;
     }
+
+    // Display database summary
+    database.print_summary();
+
+    // Count and display institute authors
+    MyString institute(institute_name);
+    printf("=== Institute Author Analysis ===\n");
+    database.print_institute_authors(institute);
+
+    // Demonstrate sorting (requirement 2)
+    printf("\n=== Sorting Demonstration ===\n");
+    demonstrate_sorting(database);
+
+    // Demonstrate merging (requirement 3)
+    printf("\n=== Merging Demonstration ===\n");
+    demonstrate_merging();
+
+    printf("\nProgram completed successfully.\n");
+    return 0;
+}
+
+void print_usage(const char* program_name) {
+    printf("Usage: %s <bib_file> <institute_name>\n", program_name);
+    printf("\n");
+    printf("Examples:\n");
+    printf("  %s papers.bib \"IIIT\"\n", program_name);
+    printf("  %s references.bib \"University of California\"\n", program_name);
+    printf("\n");
+    printf("This program:\n");
+    printf("1. Parses BibTeX files using C++ OOP principles\n");
+    printf("2. Sorts entries by <year descending, title ascending>\n");
+    printf("3. Supports merging multiple bibliography databases\n");
+    printf("4. Does not use any standard C/C++ libraries\n");
+}
+
+bool validate_arguments(int argc, char* argv[]) {
+    if (argc != 3) {
+        printf("Error: Incorrect number of arguments\n");
+        return false;
+    }
+
+    if (!argv[1] || MyString::strlen(argv[1]) == 0) {
+        printf("Error: Empty bibliography filename\n");
+        return false;
+    }
+
+    if (!argv[2] || MyString::strlen(argv[2]) == 0) {
+        printf("Error: Empty institute name\n");
+        return false;
+    }
+
+    return true;
+}
+
+void demonstrate_sorting(BibDatabase& db) {
+    printf("Sorting entries by <year descending, title ascending>...\n");
+
+    // Show entries before sorting
+    printf("\nBefore sorting (first 5 entries):\n");
+    unsigned long max_show = db.size() < 5 ? db.size() : 5;
+    for (unsigned long i = 0; i < max_show; i++) {
+        const BibEntry& entry = db.get_entry(i);
+        printf("%lu. [%s] %s\n", i+1, 
+               entry.get_year().c_str(), 
+               entry.get_title().c_str());
+    }
+
+    // Sort the database
+    db.sort_entries();
+
+    // Show entries after sorting
+    printf("\nAfter sorting (first 5 entries):\n");
+    for (unsigned long i = 0; i < max_show; i++) {
+        const BibEntry& entry = db.get_entry(i);
+        printf("%lu. [%s] %s\n", i+1, 
+               entry.get_year().c_str(), 
+               entry.get_title().c_str());
+    }
+
+    printf("\nSorting completed. Entries are now ordered by year (desc) and title (asc).\n");
+}
+
+void demonstrate_merging() {
+    printf("Creating two sample databases for merging demonstration...\n");
+
+    // Create first database
+    BibDatabase db1("Database 1");
+
+    BibEntry entry1("sample2024");
+    entry1.set_entry_type("article");
+    entry1.set_title("Sample Article 2024");
+    entry1.set_year("2024");
+    Author author1("John Doe");
+    entry1.add_author(author1);
+    db1.add_entry(entry1);
+
+    // Create second database
+    BibDatabase db2("Database 2");
+
+    BibEntry entry2("another2023");
+    entry2.set_entry_type("inproceedings");
+    entry2.set_title("Another Paper 2023");
+    entry2.set_year("2023");
+    Author author2("Jane Smith");
+    entry2.add_author(author2);
+    db2.add_entry(entry2);
+
+    printf("Database 1 has %lu entries\n", db1.size());
+    printf("Database 2 has %lu entries\n", db2.size());
+
+    // Merge databases using + operator
+    BibDatabase merged = db1 + db2;
+    merged.set_name("Merged Database");
+
+    printf("\nAfter merging with '+' operator:\n");
+    printf("Merged database has %lu entries\n", merged.size());
+
+    // Demonstrate += operator
+    BibEntry entry3("third2025");
+    entry3.set_entry_type("book");
+    entry3.set_title("Third Entry 2025");
+    entry3.set_year("2025");
+    Author author3("Bob Johnson");
+    entry3.add_author(author3);
+
+    BibDatabase db3("Database 3");
+    db3.add_entry(entry3);
+
+    merged += db3;
+
+    printf("After += operation with Database 3:\n");
+    printf("Merged database now has %lu entries\n", merged.size());
+
+    printf("\nMerging demonstration completed.\n");
 }

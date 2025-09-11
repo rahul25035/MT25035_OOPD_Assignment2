@@ -1,88 +1,49 @@
-// Author.h - Author class following original C logic (corrected)
+// author.h - Author class definition
 #ifndef AUTHOR_H
 #define AUTHOR_H
 
-#include "String.h"
-#include "SystemInterface.h"
+#include "mystring.h"
 
 class Author {
 private:
-    String name;
-    String affiliation;
+    MyString name;
+    MyString affiliation;
 
 public:
     // Constructors
-    Author() : name(), affiliation() {}
-
-    Author(const String& author_name, const String& author_affiliation = String())
-        : name(author_name), affiliation(author_affiliation) {}
-
-    Author(const char* author_name, const char* author_affiliation = "")
-        : name(author_name ? author_name : ""), affiliation(author_affiliation ? author_affiliation : "") {}
-
-    // Copy constructor
-    Author(const Author& other) : name(other.name), affiliation(other.affiliation) {}
+    Author();
+    Author(const MyString& author_name);
+    Author(const MyString& author_name, const MyString& author_affiliation);
+    Author(const Author& other);
 
     // Destructor
-    ~Author() {}
+    ~Author();
 
     // Assignment operator
-    Author& operator=(const Author& other) {
-        if (this != &other) {
-            name = other.name;
-            affiliation = other.affiliation;
-        }
-        return *this;
-    }
+    Author& operator=(const Author& other);
 
-    // Getters (return const references to avoid unnecessary copies)
-    const String& getName() const { return name; }
-    const String& getAffiliation() const { return affiliation; }
+    // Comparison operators for sorting
+    bool operator==(const Author& other) const;
+    bool operator!=(const Author& other) const;
+    bool operator<(const Author& other) const;
 
-    // Setters
-    void setName(const String& author_name) { name = author_name; }
-    void setAffiliation(const String& author_affiliation) { affiliation = author_affiliation; }
+    // Accessors
+    const MyString& get_name() const;
+    const MyString& get_affiliation() const;
 
-    // Institute checking (following original C logic with improvements)
-    bool isFromInstitute(const String& institute_name) const {
-        if (institute_name.empty()) return false;
+    // Mutators
+    void set_name(const MyString& author_name);
+    void set_affiliation(const MyString& author_affiliation);
 
-        // Compare lowercase forms
-        String name_lower = name.to_lowercase();
-        String institute_lower = institute_name.to_lowercase();
+    // Utility methods
+    bool is_from_institute(const MyString& institute_name) const;
+    MyString to_string() const;
+    bool empty() const;
+    void clear();
 
-        int pos = name_lower.find(institute_lower);
-        return pos >= 0;
-    }
-
-    // I/O functions
-    void print() const {
-        name.print();
-        if (!affiliation.empty()) {
-            SystemInterface::write(STDOUT_FILENO, " (", 2);
-            affiliation.print();
-            SystemInterface::write(STDOUT_FILENO, ")", 1);
-        }
-    }
-
-    void println() const {
-        print();
-        SystemInterface::write(STDOUT_FILENO, "\n", 1);
-    }
-
-    // Validation
-    bool isValid() const {
-        return !name.empty();
-    }
-
-    // Comparison for sorting
-    bool operator<(const Author& other) const {
-        return name < other.name;
-    }
-
-    bool operator==(const Author& other) const {
-        return name == other.name && affiliation == other.affiliation;
-    }
+    // Static parsing method
+    static bool parse_author_field(const MyString& author_field, Author* authors, 
+                                  int max_authors, int& author_count);
 };
 
 #endif // AUTHOR_H
